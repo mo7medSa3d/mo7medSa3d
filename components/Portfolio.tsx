@@ -9,7 +9,6 @@ import {
 import {
     useCallback,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -24,6 +23,7 @@ import {
     Github,
     Linkedin,
     Mail,
+    Menu,
     Moon,
     Sun,
     Terminal,
@@ -31,7 +31,6 @@ import {
 } from "lucide-react";
 import { PROFILE, PROJECTS, SKILLS } from "@/constants/data";
 import { useTheme } from "@/hooks/useTheme";
-import Cursor from "./Cursor";
 
 const AICore = dynamic(() => import("@/three/AICore"), {
     ssr: false,
@@ -72,27 +71,33 @@ type ThemeVars = Record<
 >;
 
 const DARK_THEME: ThemeVars = {
-    "--paper": "#05070a",
-    "--ink": "#f4f7f9",
-    "--muted": "#8e99a3",
-    "--line": "rgba(255,255,255,.1)",
-    "--glass": "rgba(11,14,19,.62)",
-    "--signal": "#ffb454",
-    "--signal-2": "#5eead4",
-    "--aurora-1": "rgba(255,180,84,.14)",
-    "--aurora-2": "rgba(94,234,212,.1)",
+    "--paper": "#050505",
+    "--ink": "#FAFAFA",
+    "--muted": "#A1A1AA",
+
+    "--glass": "rgba(255,255,255,.04)",
+    "--line": "rgba(255,255,255,.08)",
+
+    "--signal": "#FFFFFF",
+    "--signal-2": "#D4D4D8",
+
+    "--aurora-1": "rgba(255,255,255,.05)",
+    "--aurora-2": "rgba(255,255,255,.02)",
 };
 
 const LIGHT_THEME: ThemeVars = {
-    "--paper": "#eef1f0",
-    "--ink": "#0a1013",
-    "--muted": "#5c6669",
-    "--line": "rgba(10,16,19,.12)",
-    "--glass": "rgba(255,255,255,.65)",
-    "--signal": "#c67a1e",
-    "--signal-2": "#0f9c8c",
-    "--aurora-1": "rgba(198,122,30,.18)",
-    "--aurora-2": "rgba(15,156,140,.14)",
+    "--paper": "#FCFCFC",
+    "--ink": "#090909",
+    "--muted": "#52525B",
+
+    "--glass": "rgba(255,255,255,.78)",
+    "--line": "rgba(0,0,0,.08)",
+
+    "--signal": "#090909",
+    "--signal-2": "#3F3F46",
+
+    "--aurora-1": "rgba(0,0,0,.035)",
+    "--aurora-2": "rgba(0,0,0,.02)",
 };
 
 /** Skill category keyword matchers, evaluated in priority order. */
@@ -106,6 +111,55 @@ const SKILL_CATEGORY_PATTERNS: [category: string, pattern: RegExp][] = [
 function categorizeSkill(skill: string): string {
     const match = SKILL_CATEGORY_PATTERNS.find(([, pattern]) => pattern.test(skill));
     return match?.[0] ?? "Core Stack";
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Custom Cursor                                                              */
+/* -------------------------------------------------------------------------- */
+
+function Cursor() {
+    const mx = useMotionValue(-100);
+    const my = useMotionValue(-100);
+    const x = useSpring(mx, { stiffness: 700, damping: 42 });
+    const y = useSpring(my, { stiffness: 700, damping: 42 });
+    const rx = useSpring(mx, { stiffness: 210, damping: 25 });
+    const ry = useSpring(my, { stiffness: 210, damping: 25 });
+    const [label, setLabel] = useState("");
+
+    useEffect(() => {
+        const m = (e: MouseEvent) => {
+            mx.set(e.clientX);
+            my.set(e.clientY);
+        };
+        const h = (e: MouseEvent) => {
+            const t = (e.target as HTMLElement).closest<HTMLElement>(
+                "[data-cursor],a,button"
+            );
+            setLabel(t?.dataset.cursor || (t ? "VIEW" : ""));
+        };
+        addEventListener("mousemove", m);
+        document.addEventListener("mouseover", h);
+        return () => {
+            removeEventListener("mousemove", m);
+            document.removeEventListener("mouseover", h);
+        };
+    }, []);
+
+    return (
+        <>
+            <motion.div
+                style={{ x, y }}
+                className="pointer-events-none fixed left-0 top-0 z-[150] hidden h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference md:block"
+            />
+            <motion.div
+                style={{ x: rx, y: ry }}
+                animate={{ width: label ? 72 : 34, height: label ? 72 : 34 }}
+                className="pointer-events-none fixed left-0 top-0 z-[149] hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-300/50 bg-cyan-300/5 text-[8px] font-bold tracking-widest text-cyan-200 backdrop-blur md:flex"
+            >
+                {label}
+            </motion.div>
+        </>
+    );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -303,7 +357,7 @@ function Loader({ onDone }: { onDone: () => void }) {
                         style={{ width: `${progress}%` }}
                     />
                 </div>
-                <p className="mt-3 text-right text-xs text-white/40">{progress}%</p>
+                <p className="mt-3 text-right text-xs text-[var(--muted)]">{progress}%</p>
             </div>
         </motion.div>
     );
@@ -346,7 +400,6 @@ const WELCOME_ENTRY: HistoryEntry = {
 interface TerminalContactProps {
     onToggleTheme: () => void;
 }
-
 export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
     const [history, setHistory] = useState<HistoryEntry[]>([WELCOME_ENTRY]);
     const [input, setInput] = useState("");
@@ -407,7 +460,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "whoami":
                     output = (
                         <div className="space-y-2">
-                            <div className="font-semibold text-[var(--signal)]">{PROFILE.name}</div>
+                            <div className="font-semibold text-cyan-300">{PROFILE.name}</div>
                             <div className="text-white/70">{PROFILE.bio}</div>
                             <div className="text-xs text-white/50">{PROFILE.university}</div>
                         </div>
@@ -452,7 +505,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                             <span className="text-white/70">Email:</span>
                             <a
                                 href={`mailto:${PROFILE.email}`}
-                                className="text-[var(--signal)] underline underline-offset-2"
+                                className="text-cyan-300 underline underline-offset-2"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 {PROFILE.email}
@@ -469,7 +522,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                                 href={PROFILE.github}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[var(--signal)] underline underline-offset-2"
+                                className="text-cyan-300 underline underline-offset-2"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 {PROFILE.github}
@@ -486,7 +539,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                                 href={PROFILE.linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[var(--signal)] underline underline-offset-2"
+                                className="text-cyan-300 underline underline-offset-2"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 {PROFILE.linkedin}
@@ -561,12 +614,12 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
 
     return (
         <div
-            className="overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[#070a0e] text-white shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]"
+            className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#070a0e] text-white shadow-[0_40px_120px_-40px_rgba(0,0,0,0.6)]"
             onClick={handleContainerClick}
         >
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
                 <div className="flex items-center gap-2 text-xs text-white/40">
-                    <Terminal size={14} className="text-[var(--signal)]" aria-hidden="true" />
+                    <Terminal size={14} className="text-cyan-300" aria-hidden="true" />
                     <span>mohamed@neural-engine: ~</span>
                 </div>
                 <div className="flex gap-1.5" aria-hidden="true">
@@ -576,16 +629,20 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 </div>
             </div>
 
-            <div role="log" aria-live="polite" className="min-h-96 max-h-[500px] overflow-y-auto p-6 font-mono text-sm">
+            <div
+                role="log"
+                aria-live="polite"
+                className="min-h-[260px] max-h-[360px] overflow-y-auto p-4 font-mono text-sm sm:min-h-96 sm:max-h-[500px] sm:p-6"
+            >
                 {history.map((entry, i) => (
                     <div
                         key={i}
                         className={`py-0.5 whitespace-pre-wrap ${
                             entry.type === "prompt"
-                                ? "text-[var(--signal)]"
+                                ? "text-cyan-300"
                                 : entry.type === "error"
-                                  ? "text-rose-400"
-                                  : "text-white/70"
+                                ? "text-rose-400"
+                                : "text-white/70"
                         }`}
                     >
                         {entry.text}
@@ -594,8 +651,8 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 <div ref={endRef} />
             </div>
 
-            <form onSubmit={handleSubmit} className="flex items-center gap-3 border-t border-white/10 px-6 py-4">
-                <span className="text-[var(--signal)]" aria-hidden="true">
+            <form onSubmit={handleSubmit} className="flex items-center gap-3 border-t border-white/10 px-4 py-3 sm:px-6 sm:py-4">
+                <span className="text-cyan-300" aria-hidden="true">
                     $
                 </span>
                 <input
@@ -705,24 +762,41 @@ function ProjectCase({ project, index, onOpen }: ProjectCaseProps) {
         rotateY.set(0);
     };
 
+    // Bounded so the result panel's tech list can never grow taller than its
+    // viewport-scaled budget, regardless of how many technologies a project lists.
+    const visibleTech = project.tech.slice(0, 4);
+
     return (
         <article
-            className="sticky top-0 flex min-h-screen items-center border-t border-[var(--line)] bg-[var(--paper)] px-6 py-24"
+            className="h-[min(82svh,720px)] w-full max-w-7xl overflow-hidden rounded-[clamp(1rem,1.5vw,2.25rem)] border border-[var(--line)] bg-[var(--glass)] p-[clamp(0.5rem,1vw+1.5svh,2rem)] shadow-[0_30px_120px_rgba(0,0,0,.75)] backdrop-blur-xl"
             style={{
                 zIndex: index + 1,
                 backgroundImage: `radial-gradient(circle at 80% 30%, ${project.color}22, transparent 32%)`,
             }}
         >
-            <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-center">
-                <div data-reveal>
-                    <p className="text-xs uppercase tracking-[.25em]" style={{ color: project.color }}>
+            <div className="mx-auto flex h-full w-full max-w-7xl flex-row items-center gap-[clamp(0.5rem,1.5vw,2.5rem)]">
+                <div
+                    data-reveal
+                    className="flex min-w-0 basis-[55%] flex-col justify-center overflow-hidden"
+                >
+                    <p
+                        className="text-[clamp(.55rem,.5vw+.5svh,.75rem)] uppercase tracking-[.25em]"
+                        style={{ color: project.color }}
+                    >
                         Case study — 0{index + 1} of {PROJECTS.length}
                     </p>
-                    <h3 className="mt-7 text-[clamp(2rem,5.5vw,4.5rem)] font-semibold tracking-[-.05em]">{project.title}</h3>
-                    <p className="mt-6 leading-8 text-[var(--muted)]">{project.summary}</p>
-                    <div className="mt-7 flex flex-wrap gap-2">
+                    <h3 className="mt-[clamp(0.5rem,0.6vw+0.8svh,1rem)] break-words text-[clamp(1rem,2.2vw+1.6svh,4.5rem)] font-semibold leading-[.95] tracking-tight text-[var(--ink)]">
+                        {project.title}
+                    </h3>
+                    <p className="mt-[clamp(0.5rem,0.6vw+0.8svh,1rem)] overflow-hidden text-[clamp(.65rem,.5vw+.7svh,1rem)] leading-relaxed text-[var(--muted)] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] [display:-webkit-box]">
+                        {project.summary}
+                    </p>
+                    <div className="mt-[clamp(0.75rem,0.8vw+1svh,1.75rem)] flex flex-wrap gap-[clamp(0.25rem,0.4vw+0.4svh,0.5rem)]">
                         {project.tech.map((tech) => (
-                            <span key={tech} className="rounded-full border border-[var(--line)] px-3 py-2 text-xs">
+                            <span
+                                key={tech}
+                                className="whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--glass)] px-[clamp(0.4rem,0.5vw+0.3svh,0.75rem)] py-[clamp(0.15rem,0.2vw+0.2svh,0.25rem)] text-[clamp(.5rem,.4vw+.4svh,.8rem)] text-[var(--ink)] backdrop-blur-xl"
+                            >
                                 {tech}
                             </span>
                         ))}
@@ -732,7 +806,7 @@ function ProjectCase({ project, index, onOpen }: ProjectCaseProps) {
                             type="button"
                             onClick={onOpen}
                             data-cursor="OPEN"
-                            className="mt-8 flex items-center gap-3 rounded-full bg-[var(--ink)] px-7 py-4 text-[var(--paper)] transition-all duration-300 hover:scale-105 hover:shadow-[0_15px_40px_rgba(0,0,0,.25)]"
+                            className="mt-[clamp(0.5rem,0.5vw+0.7svh,1rem)] flex w-fit items-center gap-2 rounded-full bg-[var(--ink)] px-[clamp(0.6rem,0.6vw+0.5svh,1.5rem)] py-[clamp(0.35rem,0.4vw+0.5svh,0.75rem)] text-[clamp(.6rem,.5vw+.5svh,.9rem)] font-medium text-[var(--paper)] transition-all duration-300 hover:scale-105 hover:opacity-90"
                         >
                             View Case Study
                             <ArrowUpRight size={18} aria-hidden="true" />
@@ -743,70 +817,92 @@ function ProjectCase({ project, index, onOpen }: ProjectCaseProps) {
                 <motion.div
                     onMouseMove={handlePointerMove}
                     onMouseLeave={handlePointerLeave}
-                    style={{ rotateX: springRotateX, rotateY: springRotateY, transformPerspective: 900 }}
-                    whileHover={{ scale: 1.02, transition: { duration: 0.25 } }}
-                    // Deliberately theme-independent: this panel is always a dark glass
-                    // surface (like the terminal/modal), so its white text stays legible
-                    // whether the page itself is in light or dark mode.
-                    className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-[#161b22] to-[#0b0e12] p-8 text-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.5)]"
+                    style={{
+                        rotateX: springRotateX,
+                        rotateY: springRotateY,
+                        transformPerspective: 900,
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    className="relative flex min-w-0 basis-[45%] flex-col overflow-hidden rounded-[clamp(0.85rem,1.4vw,2rem)] border border-white/[0.08] bg-[#050505] p-[clamp(0.5rem,1vw+1.5svh,1.75rem)] text-white shadow-[0_30px_80px_rgba(0,0,0,.85)] backdrop-blur-2xl will-change-transform"
                 >
                     <div
-                        aria-hidden="true"
-                        className="absolute -right-24 -top-24 h-56 w-56 rounded-full blur-3xl"
+                        className="absolute -right-[clamp(3rem,5vw+4svh,6rem)] -top-[clamp(3rem,5vw+4svh,6rem)] h-[clamp(6rem,10vw+8svh,14rem)] w-[clamp(6rem,10vw+8svh,14rem)] rounded-full blur-3xl"
                         style={{ background: `${project.color}30` }}
                     />
 
-                    <div className="relative flex items-start justify-between">
+                    <div className="relative flex items-start justify-between gap-[clamp(0.5rem,0.6vw+0.6svh,0.75rem)]">
                         <div>
-                            <p className="text-xs uppercase tracking-[.25em] text-white/40">Project Result</p>
-                            <h4 className="mt-3 text-[clamp(2.25rem,5vw,3.75rem)] font-bold" style={{ color: project.color }}>
+                            <p className="text-[clamp(.5rem,.4vw+.4svh,.75rem)] uppercase tracking-[.25em] text-white/40">
+                                Project Result
+                            </p>
+                            <h4
+                                className="mt-[clamp(0.25rem,0.3vw+0.4svh,0.5rem)] text-[clamp(1.25rem,1.6vw+2.4svh,3.75rem)] font-bold"
+                                style={{ color: project.color }}
+                            >
                                 {project.metric}
                             </h4>
-                            <p className="mt-2 text-white/50">{project.label}</p>
+                            <p className="mt-[clamp(0.25rem,0.3vw+0.3svh,0.5rem)] text-[clamp(.55rem,.4vw+.5svh,.85rem)] text-white/50">
+                                {project.label}
+                            </p>
                         </div>
                         <div
-                            className="rounded-full border px-4 py-2 text-xs"
-                            style={{ borderColor: `${project.color}55`, color: project.color }}
+                            className="rounded-full border px-[clamp(0.5rem,0.5vw+0.4svh,0.75rem)] py-[clamp(0.15rem,0.2vw+0.2svh,0.25rem)] text-[clamp(.5rem,.35vw+.4svh,.75rem)]"
+                            style={{
+                                borderColor: `${project.color}55`,
+                                color: project.color,
+                            }}
                         >
                             LIVE
                         </div>
                     </div>
 
-                    <div className="my-8 h-px bg-white/10" />
+                    <div className="my-[clamp(0.75rem,0.8vw+1.2svh,2rem)] h-px bg-white/10" />
 
-                    <div className="space-y-4">
-                        {project.tech.map((tech, i) => (
+                    <div className="flex flex-col gap-[clamp(0.4rem,0.5vw+0.7svh,1rem)]">
+                        {visibleTech.map((tech, i) => (
                             <motion.div
                                 key={tech}
-                                whileHover={{ x: 6 }}
-                                className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition-colors hover:border-white/20 hover:bg-white/[0.05]"
+                                whileHover={{ x: 5 }}
+                                className="group flex items-center justify-between rounded-[clamp(0.75rem,1vw,1rem)] border border-white/10 bg-white/[0.03] px-[clamp(0.5rem,0.6vw+0.6svh,1.25rem)] py-[clamp(0.35rem,0.4vw+0.6svh,1rem)]"
                             >
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-[clamp(0.4rem,0.5vw+0.4svh,0.75rem)]">
                                     <div
-                                        className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold"
-                                        style={{ background: `${project.color}20`, color: project.color }}
+                                        className="flex h-[clamp(1.5rem,2vw+2svh,2.5rem)] w-[clamp(1.5rem,2vw+2svh,2.5rem)] items-center justify-center rounded-full text-[clamp(.55rem,.4vw+.5svh,.85rem)] font-semibold"
+                                        style={{
+                                            background: `${project.color}20`,
+                                            color: project.color,
+                                        }}
                                     >
                                         {String(i + 1).padStart(2, "0")}
                                     </div>
-                                    <span>{tech}</span>
+                                    <span className="text-[clamp(.65rem,.5vw+.6svh,1rem)]">
+                                        {tech}
+                                    </span>
                                 </div>
                                 <ArrowUpRight
-                                    size={18}
-                                    aria-hidden="true"
-                                    className="opacity-40 transition group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-100"
+                                    size={16}
+                                    className="opacity-40 group-hover:translate-x-1 group-hover:-translate-y-1"
                                 />
                             </motion.div>
                         ))}
                     </div>
 
-                    <div className="mt-8 grid grid-cols-2 gap-4">
-                        <div className="rounded-2xl border border-white/10 p-5">
-                            <p className="text-xs uppercase text-white/40">Stack</p>
-                            <b className="mt-2 block text-2xl">{project.tech.length}</b>
+                    <div className="mt-[clamp(0.5rem,0.6vw+0.8svh,1.5rem)] grid grid-cols-2 gap-[clamp(0.4rem,0.5vw+0.5svh,0.75rem)]">
+                        <div className="rounded-[clamp(0.75rem,1vw,1rem)] border border-white/10 p-[clamp(0.5rem,0.6vw+0.7svh,1.25rem)]">
+                            <p className="text-[clamp(.5rem,.35vw+.4svh,.75rem)] uppercase text-white/40">
+                                Stack
+                            </p>
+                            <b className="mt-[clamp(0.25rem,0.3vw+0.3svh,0.5rem)] block text-[clamp(.95rem,.8vw+1.2svh,1.875rem)]">
+                                {project.tech.length}
+                            </b>
                         </div>
-                        <div className="rounded-2xl border border-white/10 p-5">
-                            <p className="text-xs uppercase text-white/40">Case Study</p>
-                            <b className="mt-2 block text-2xl">0{index + 1}</b>
+                        <div className="rounded-[clamp(0.75rem,1vw,1rem)] border border-white/10 p-[clamp(0.5rem,0.6vw+0.7svh,1.25rem)]">
+                            <p className="text-[clamp(.5rem,.35vw+.4svh,.75rem)] uppercase text-white/40">
+                                Case Study
+                            </p>
+                            <b className="mt-[clamp(0.25rem,0.3vw+0.3svh,0.5rem)] block text-[clamp(.95rem,.8vw+1.2svh,1.875rem)]">
+                                0{index + 1}
+                            </b>
                         </div>
                     </div>
                 </motion.div>
@@ -827,6 +923,7 @@ function ProjectModal({ project, index, onClose }: { project: (typeof PROJECTS)[
             aria-label={project.title}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 z-[120] overflow-auto bg-black/80 p-6 backdrop-blur-2xl"
@@ -894,11 +991,13 @@ export default function Portfolio() {
     const [light, setLight] = useTheme();
     const [loaded, setLoaded] = useState(false);
     const [modalIndex, setModalIndex] = useState<number | null>(null);
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [compact, setCompact] = useState(false);
     const [activeSection, setActiveSection] = useState<string>(NAV_SECTIONS[0]);
     const [now, setNow] = useState<Date | null>(null);
     const reduced = usePrefersReducedMotion();
-
+    const projectsSection = useRef<HTMLElement>(null);
+    const projectsTrack = useRef<HTMLDivElement>(null);
     const scrollProgress = useMotionValue(0);
     const scrollProgressSpring = useSpring(scrollProgress, { stiffness: 130, damping: 28 });
 
@@ -941,36 +1040,68 @@ export default function Portfolio() {
         return () => clearInterval(id);
     }, []);
 
-    // Escape closes the project modal.
+    // Escape closes the project modal and the mobile nav menu.
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") setModalIndex(null);
+            if (event.key === "Escape") {
+                setModalIndex(null);
+                setMobileNavOpen(false);
+            }
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, []);
 
-    // GSAP scroll-triggered reveal animations.
-    useLayoutEffect(() => {
+    // GSAP scroll-triggered reveal animations & responsive matchMedia.
+    useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
+
         const ctx = gsap.context(() => {
-            gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) =>
+            // Reveal animations for all devices
+            gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
                 gsap.fromTo(
                     el,
-                    reduced ? { autoAlpha: 0 } : { autoAlpha: 0, y: 60, filter: "blur(12px)" },
+                    { opacity: 0, y: 60 },
                     {
-                        autoAlpha: 1,
+                        opacity: 1,
                         y: 0,
-                        filter: "blur(0)",
-                        duration: reduced ? 0.2 : 1,
-                        ease: "power4.out",
-                        scrollTrigger: { trigger: el, start: "top 88%", once: true },
-                    },
-                ),
-            );
+                        duration: 0.9,
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: el,
+                            start: "top 85%",
+                        },
+                    }
+                );
+            });
+
+            // MatchMedia for Desktop Horizontal Scroll only!
+            const mm = gsap.matchMedia();
+
+            mm.add("(min-width: 0px)", () => {
+                if (projectsSection.current && projectsTrack.current) {
+                    const cards = gsap.utils.toArray(".project-card");
+
+                    gsap.to(cards, {
+                        xPercent: -100 * (cards.length - 1),
+                        ease: "none",
+                        scrollTrigger: {
+                            invalidateOnRefresh: true,
+                            trigger: projectsSection.current,
+                            pin: true,
+                            scrub: 1,
+                            start: "top top",
+                            end: () =>
+                                "+=" +
+                                (projectsTrack.current!.scrollWidth - window.innerWidth),
+                        },
+                    });
+                }
+            });
         });
+
         return () => ctx.revert();
-    }, [loaded, reduced]);
+    }, []);
 
     const themeVars = useMemo<ThemeVars>(() => (light ? LIGHT_THEME : DARK_THEME), [light]);
     const activeProject = modalIndex !== null ? PROJECTS[modalIndex] : null;
@@ -978,7 +1109,8 @@ export default function Portfolio() {
     return (
         <main
             style={themeVars as React.CSSProperties}
-            className="cursor-none overflow-clip bg-[var(--paper)] text-[var(--ink)] transition-colors duration-700"
+            // Added md: prefix so the custom cursor is desktop-only, preventing touch issues on mobile
+            className="md:cursor-none overflow-clip bg-[var(--paper)] text-[var(--ink)] transition-colors duration-700"
         >
             <a
                 href="#home"
@@ -990,6 +1122,8 @@ export default function Portfolio() {
             <AnimatePresence>{!loaded && <Loader onDone={() => setLoaded(true)} />}</AnimatePresence>
 
             <Background reduced={reduced} />
+
+            {/* The integrated Cursor Component is rendered here */}
             <Cursor />
 
             <motion.div
@@ -998,51 +1132,101 @@ export default function Portfolio() {
             />
 
             {/* Navbar */}
-            <nav
-                className={`fixed left-1/2 top-4 z-50 flex w-[min(900px,calc(100%-24px))] -translate-x-1/2 items-center justify-between rounded-2xl border border-[var(--line)] bg-[var(--glass)] px-4 backdrop-blur-2xl transition-all duration-300 ${
-                    compact ? "h-14" : "h-16"
-                }`}
-            >
-                <b className="text-sm">MA / Mohamed Al-Shaer</b>
-                <div className="hidden gap-6 md:flex">
-                    {NAV_LINKS.map((link) => {
-                        const id = link.toLowerCase();
-                        const isActive = activeSection === id;
-                        return (
-                            <a
-                                key={link}
-                                href={`#${id}`}
-                                aria-current={isActive ? "true" : undefined}
-                                className={`relative text-sm transition-colors ${
-                                    isActive ? "text-[var(--ink)]" : "text-[var(--muted)]"
-                                }`}
+            <nav className="fixed left-1/2 top-4 z-50 w-[min(900px,calc(100%-24px))] -translate-x-1/2 rounded-2xl border border-[var(--line)] bg-[var(--glass)] backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,.18)]">
+                <div
+                    className={`flex items-center justify-between px-4 transition-all duration-300 ${compact ? "h-14" : "h-16"
+                        }`}
+                >
+                    <b className="text-sm text-[var(--ink)]">MA / Mohamed Al-Shaer</b>
+
+                    <div className="hidden items-center gap-1 md:flex">
+                        {NAV_LINKS.map((link) => {
+                            const id = link.toLowerCase();
+                            const isActive = activeSection === id;
+                            return (
+                                <a
+                                    key={link}
+                                    href={`#${id}`}
+                                    aria-current={isActive ? "true" : undefined}
+                                    className={`relative rounded-full px-4 py-2 text-sm transition-colors ${isActive ? "text-[var(--ink)]" : "text-[var(--muted)] hover:text-[var(--ink)]"
+                                        }`}
+                                >
+                                    {isActive && (
+                                        <motion.span
+                                            layoutId="nav-pill"
+                                            transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                                            className="absolute inset-0 -z-10 rounded-full bg-[var(--signal)]/12"
+                                        />
+                                    )}
+                                    {link}
+                                </a>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Magnetic>
+                            <button
+                                type="button"
+                                onClick={toggleTheme}
+                                aria-label={light ? "Switch to dark mode" : "Switch to light mode"}
+                                className="rounded-full border border-[var(--line)] p-3"
                             >
-                                {link}
-                                {isActive && (
-                                    <motion.span
-                                        layoutId="nav-underline"
-                                        className="absolute -bottom-1 left-0 h-px w-full bg-[var(--signal)]"
-                                    />
-                                )}
-                            </a>
-                        );
-                    })}
+                                {light ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+                            </button>
+                        </Magnetic>
+                        <button
+                            type="button"
+                            onClick={() => setMobileNavOpen((prev) => !prev)}
+                            aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+                            aria-expanded={mobileNavOpen}
+                            className="rounded-full border border-[var(--line)] p-3 md:hidden"
+                        >
+                            {mobileNavOpen ? <X size={17} aria-hidden="true" /> : <Menu size={17} aria-hidden="true" />}
+                        </button>
+                    </div>
                 </div>
-                <Magnetic>
-                    <button
-                        type="button"
-                        onClick={toggleTheme}
-                        aria-label={light ? "Switch to dark mode" : "Switch to light mode"}
-                        className="rounded-full border border-[var(--line)] p-3"
-                    >
-                        {light ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
-                    </button>
-                </Magnetic>
+
+                <AnimatePresence>
+                    {mobileNavOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden border-t border-[var(--line)] md:hidden"
+                        >
+                            <div className="flex flex-col gap-1 p-3">
+                                {NAV_LINKS.map((link) => {
+                                    const id = link.toLowerCase();
+                                    const isActive = activeSection === id;
+                                    return (
+                                        <a
+                                            key={link}
+                                            href={`#${id}`}
+                                            onClick={() => setMobileNavOpen(false)}
+                                            aria-current={isActive ? "true" : undefined}
+                                            className={`rounded-xl px-4 py-3 text-sm transition-colors ${isActive
+                                                ? "bg-[var(--signal)]/12 text-[var(--ink)]"
+                                                : "text-[var(--muted)] hover:bg-[var(--line)] hover:text-[var(--ink)]"
+                                                }`}
+                                        >
+                                            {link}
+                                        </a>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </nav>
 
             {/* Hero */}
-            <section id="home" className="relative grid min-h-screen items-center px-6 pt-24 md:grid-cols-2 md:px-12">
-                <div className="relative z-10">
+            <section
+                id="home"
+                className="relative flex flex-col gap-14 px-6 pb-20 pt-28 md:grid md:min-h-screen md:grid-cols-2 md:items-center md:gap-10 md:px-12 md:pb-0 md:pt-24"
+            >
+                <div className="relative z-10 min-w-0">
                     <span className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--glass)] px-4 py-2 text-xs">
                         <span className="h-1.5 w-1.5 rounded-full bg-[var(--signal)]" aria-hidden="true" />
                         Available for high-impact opportunities
@@ -1092,8 +1276,14 @@ export default function Portfolio() {
                     </div>
                 </div>
 
-                <div className="h-[500px] md:h-[720px]">
-                    <AICore />
+                <div className="relative min-w-0">
+                    <div className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[.35em] text-[var(--muted)] md:hidden">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--signal)]" aria-hidden="true" />
+                        Signal Core
+                    </div>
+                    <div className="relative mx-auto h-[320px] w-full max-w-md overflow-hidden sm:h-[400px] md:h-[720px] md:max-w-none md:rounded-none md:border-none md:bg-transparent md:backdrop-blur-none">
+                        <AICore />
+                    </div>
                 </div>
 
                 <a
@@ -1111,14 +1301,14 @@ export default function Portfolio() {
             </section>
 
             {/* About */}
-            <section id="about" className="mx-auto max-w-7xl px-6 py-36">
+            <section id="about" className="mx-auto max-w-7xl px-6 py-20 md:py-36">
                 <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-semibold">
                     Engineering intelligence for{" "}
                     <span className="text-[var(--muted)]">real business problems.</span>
                 </h2>
                 <div data-reveal className="mt-14 grid gap-5 md:grid-cols-2">
-                    <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--glass)] p-9">
-                        <p className="text-3xl leading-relaxed">
+                    <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--glass)] p-6 md:p-9">
+                        <p className="text-xl leading-relaxed sm:text-2xl md:text-3xl">
                             I specialize in machine learning, predictive analytics, data
                             engineering, automation and business intelligence — turning raw,
                             messy datasets into systems people can actually act on.
@@ -1163,7 +1353,7 @@ export default function Portfolio() {
             </section>
 
             {/* Expertise */}
-            <section id="expertise" className="border-y border-[var(--line)] px-6 py-36 text-center">
+            <section id="expertise" className="border-y border-[var(--line)] px-6 py-20 md:py-36 text-center">
                 <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-semibold">
                     A connected intelligence stack.
                 </h2>
@@ -1173,21 +1363,32 @@ export default function Portfolio() {
             </section>
 
             {/* Projects */}
-            <section id="projects">
-                <div className="mx-auto max-w-7xl px-6 py-32">
-                    <h2 data-reveal className="text-[clamp(2.25rem,7vw,6rem)] font-semibold">
-                        Immersive case studies.
-                        <br />
-                        <span className="text-[var(--muted)]">Built to perform.</span>
-                    </h2>
+            <section
+                id="projects"
+                ref={projectsSection}
+                className="relative h-screen min-h-screen overflow-hidden"
+            >
+                <div
+                    ref={projectsTrack}
+                    className="flex h-screen flex-row items-center"
+                >
+                    {PROJECTS.map((project, i) => (
+                        <div
+                            key={project.title}
+                            className="project-card flex h-screen w-screen shrink-0 items-center justify-center px-[clamp(0.5rem,1.5vw+1svh,3rem)]"
+                        >
+                            <ProjectCase
+                                project={project}
+                                index={i}
+                                onOpen={() => setModalIndex(i)}
+                            />
+                        </div>
+                    ))}
                 </div>
-                {PROJECTS.map((project, i) => (
-                    <ProjectCase key={project.title} project={project} index={i} onOpen={() => setModalIndex(i)} />
-                ))}
             </section>
 
             {/* Contact */}
-            <section id="contact" className="mx-auto max-w-7xl px-6 py-36">
+            <section id="contact" className="mx-auto max-w-7xl px-6 py-20 md:py-36">
                 <h2 data-reveal className="text-[clamp(2.25rem,7vw,6rem)] font-semibold">
                     Let&apos;s build the next <span className="text-[var(--muted)]">intelligent product.</span>
                 </h2>
@@ -1197,8 +1398,8 @@ export default function Portfolio() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-[var(--line)] p-10">
-                <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:justify-between">
+            <footer className="border-t border-[var(--line)] p-6 sm:p-10">
+                <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div>
                         <b className="text-xl">Mohamed Al-Shaer</b>
                         <p className="text-[var(--muted)]">Data Scientist · Machine Learning Engineer</p>
@@ -1226,7 +1427,7 @@ export default function Portfolio() {
                             <Mail size={16} aria-hidden="true" />
                         </a>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left md:text-right">
                         <p className="text-sm text-[var(--muted)]">Alexandria, Egypt</p>
                         <p className="tabular-nums text-sm text-[var(--muted)]">
                             {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "--:--"}
