@@ -1,0 +1,1 @@
+"use client";import{useEffect,useState}from"react";export function useTheme(){const[light,setLight]=useState(false);useEffect(()=>setLight(localStorage.getItem("mas-theme")==="light"),[]);useEffect(()=>localStorage.setItem("mas-theme",light?"light":"dark"),[light]);return[light,setLight]as const}
