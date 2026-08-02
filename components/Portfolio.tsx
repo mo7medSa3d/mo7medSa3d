@@ -718,7 +718,7 @@ function ProjectCase({ project, index, onOpen }: ProjectCaseProps) {
                     <p className="text-xs uppercase tracking-[.25em]" style={{ color: project.color }}>
                         Case study — 0{index + 1} of {PROJECTS.length}
                     </p>
-                    <h3 className="mt-7 text-5xl font-semibold tracking-[-.05em] md:text-7xl">{project.title}</h3>
+                    <h3 className="mt-7 text-[clamp(2rem,5.5vw,4.5rem)] font-semibold tracking-[-.05em]">{project.title}</h3>
                     <p className="mt-6 leading-8 text-[var(--muted)]">{project.summary}</p>
                     <div className="mt-7 flex flex-wrap gap-2">
                         {project.tech.map((tech) => (
@@ -759,7 +759,7 @@ function ProjectCase({ project, index, onOpen }: ProjectCaseProps) {
                     <div className="relative flex items-start justify-between">
                         <div>
                             <p className="text-xs uppercase tracking-[.25em] text-white/40">Project Result</p>
-                            <h4 className="mt-3 text-6xl font-bold" style={{ color: project.color }}>
+                            <h4 className="mt-3 text-[clamp(2.25rem,5vw,3.75rem)] font-bold" style={{ color: project.color }}>
                                 {project.metric}
                             </h4>
                             <p className="mt-2 text-white/50">{project.label}</p>
@@ -851,7 +851,7 @@ function ProjectModal({ project, index, onClose }: { project: (typeof PROJECTS)[
                 <p className="text-xs uppercase tracking-[.25em]" style={{ color: project.color }}>
                     Case study — 0{index + 1}
                 </p>
-                <h2 className="mt-4 text-5xl font-semibold">{project.title}</h2>
+                <h2 className="mt-4 text-[clamp(1.75rem,4.5vw,3rem)] font-semibold">{project.title}</h2>
                 <p className="mt-8 max-w-3xl leading-8 text-white/60">{project.summary}</p>
 
                 <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -1047,7 +1047,7 @@ export default function Portfolio() {
                         <span className="h-1.5 w-1.5 rounded-full bg-[var(--signal)]" aria-hidden="true" />
                         Available for high-impact opportunities
                     </span>
-                    <h1 className="mt-9 text-6xl font-semibold leading-[.84] tracking-[-.075em] md:text-8xl">
+                    <h1 className="mt-9 text-[clamp(2.75rem,9vw,7.5rem)] font-semibold leading-[.84] tracking-[-.075em]">
                         Mohamed
                         <br />
                         <span className="text-[var(--muted)]">Al-Shaer.</span>
@@ -1112,7 +1112,7 @@ export default function Portfolio() {
 
             {/* About */}
             <section id="about" className="mx-auto max-w-7xl px-6 py-36">
-                <h2 data-reveal className="text-5xl font-semibold md:text-7xl">
+                <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-semibold">
                     Engineering intelligence for{" "}
                     <span className="text-[var(--muted)]">real business problems.</span>
                 </h2>
@@ -1164,7 +1164,7 @@ export default function Portfolio() {
 
             {/* Expertise */}
             <section id="expertise" className="border-y border-[var(--line)] px-6 py-36 text-center">
-                <h2 data-reveal className="text-5xl font-semibold md:text-7xl">
+                <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-semibold">
                     A connected intelligence stack.
                 </h2>
                 <div data-reveal>
@@ -1175,7 +1175,7 @@ export default function Portfolio() {
             {/* Projects */}
             <section id="projects">
                 <div className="mx-auto max-w-7xl px-6 py-32">
-                    <h2 data-reveal className="text-5xl font-semibold md:text-8xl">
+                    <h2 data-reveal className="text-[clamp(2.25rem,7vw,6rem)] font-semibold">
                         Immersive case studies.
                         <br />
                         <span className="text-[var(--muted)]">Built to perform.</span>
@@ -1188,7 +1188,7 @@ export default function Portfolio() {
 
             {/* Contact */}
             <section id="contact" className="mx-auto max-w-7xl px-6 py-36">
-                <h2 data-reveal className="text-5xl font-semibold md:text-8xl">
+                <h2 data-reveal className="text-[clamp(2.25rem,7vw,6rem)] font-semibold">
                     Let&apos;s build the next <span className="text-[var(--muted)]">intelligent product.</span>
                 </h2>
                 <div data-reveal className="mt-14">
