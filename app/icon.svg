@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1024" height="1024" style="width: 100%; height: auto; max-width: 1024px;">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2B2"/>
+      <stop offset="0.25" stop-color="#F5D76E"/>
+      <stop offset="0.55" stop-color="#D8A62A"/>
+      <stop offset="1" stop-color="#A87412"/>
+    </linearGradient>
+
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#181818"/>
+      <stop offset="100%" stop-color="#050505"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="256" cy="256" r="246" fill="url(#bg)"/>
+
+  <!-- Gold Ring -->
+  <circle
+      cx="256"
+      cy="256"
+      r="218"
+      fill="none"
+      stroke="url(#gold)"
+      stroke-width="18"/>
+
+  <!-- MS Monogram -->
+  <g fill="url(#gold)">
+
+    <!-- Left M -->
+    <path d="
+      M145 360
+      V145
+      H170
+      L228 220
+      L286 145
+      H311
+      V360
+      H278
+      V198
+      L228 261
+      L178 198
+      V360
+      Z"/>
+
+    <!-- Right S (minimal geometric) -->
+    <path d="
+      M332 176
+      C332 152 349 140 378 140
+      H402
+      V170
+      H378
+      C369 170 365 174 365 181
+      C365 188 369 193 382 197
+      L394 201
+      C421 209 433 225 433 252
+      C433 287 407 307 371 307
+      H336
+      V276
+      H371
+      C386 276 395 270 395 259
+      C395 249 388 244 373 239
+      L359 234
+      C339 227 332 209 332 190
+      Z"/>
+
+  </g>
+</svg>
