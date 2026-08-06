@@ -5,7 +5,7 @@ export const PROFILE = {
   firstName: "Mohamed",
   lastName: "Saad",
   fullName: "Mohamed Saad",
-  initials: "MA",
+  initials: "MS",
   name: "Mohamed Saad",            // للإستخدام مع whoami
   email: "mosaadx229@gmail.com",
   phone: "",
