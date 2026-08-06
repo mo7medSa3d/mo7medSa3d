@@ -3,10 +3,10 @@
 // =====================================================
 export const PROFILE = {
   firstName: "Mohamed",
-  lastName: "Al-Shaer",
-  fullName: "Mohamed Al-Shaer",
+  lastName: "Saad",
+  fullName: "Mohamed Saad",
   initials: "MA",
-  name: "Mohamed Al-Shaer",            // للإستخدام مع whoami
+  name: "Mohamed Saad",            // للإستخدام مع whoami
   email: "mosaadx229@gmail.com",
   phone: "",
   city: "Alexandria",
@@ -20,8 +20,8 @@ export const PROFILE = {
   ],
   // الوصف الذي يظهر في الهيرو والـ Terminal whoami
   bio: "Computer and Data Science student at Alexandria University building production-minded AI, predictive analytics, automation and business intelligence systems.",
-  github: "https://github.com/mo7amdSa3d",
-  linkedin: "https://www.linkedin.com/in/mohamed-saad-0886a5323",
+  github: "https://github.com/mo7medSa3d",
+  linkedin: "www.linkedin.com/in/mo7medsa3d",
   resume: "/resume.pdf",
   availabilityStatus: "Available for high-impact opportunities",
 };
@@ -106,7 +106,7 @@ export const PROJECTS = [
     tech: ["Python", "Scikit-Learn", "Flask", "Docker"],
     color: "#14b8a6",
     github:
-      "https://github.com/mo7amdSa3d/Hotel-Booking-Cancellation-Prediction",
+      "https://github.com/mo7medSa3d/Hotel-Booking-Cancellation-Prediction",
     image: "/images/projects/HBP.webp",
   },
   {
@@ -118,7 +118,7 @@ export const PROJECTS = [
     tech: ["Python", "Pandas", "Scikit-Learn", "XGBoost"],
     color: "#38d9ff",
     github:
-      "https://github.com/mo7amdSa3d/Real-Estate-Price-Prediction-Project-in-Egypt-Dubizzle-.git",
+      "https://github.com/mo7medSa3d/Real-Estate-Price-Prediction-Project-in-Egypt-Dubizzle-.git",
     image: "/images/projects/Duz.webp",
   },
   {
@@ -129,7 +129,7 @@ export const PROJECTS = [
       "Machine learning project analyzing FIFA player statistics to predict market value and classify player performance using regression, classification, and ensemble learning techniques.",
     tech: ["Python", "Scikit-Learn", "Pandas", "Machine Learning"],
     color: "#22c55e",
-    github: "https://github.com/mo7amdSa3d/fifa-player-analytics-ml",
+    github: "https://github.com/mo7medSa3d/fifa-player-analytics-ml",
     image: "/images/projects/fifa.webp",
   },
   {
@@ -140,7 +140,7 @@ export const PROJECTS = [
       "AI-powered web application that classifies SMS messages as spam or legitimate using TensorFlow/Keras, provides confidence scores, and suggests automated replies through a Flask interface.",
     tech: ["TensorFlow", "Keras", "Flask", "Python"],
     color: "#ec4899",
-    github: "https://github.com/mo7amdSa3d/SMS-Spam-Detector",
+    github: "https://github.com/mo7medSa3d/SMS-Spam-Detector",
     image: "/images/projects/Spam.webp",
   },
   {
@@ -151,7 +151,7 @@ export const PROJECTS = [
       "Fault-tolerant browser automation pipeline producing a clean structured dataset.",
     tech: ["Playwright", "Selenium", "Python", "Automation"],
     color: "#a78bfa",
-    github: "https://github.com/mo7amdSa3d/Hatla2ee-Car-Scraper-Market-Analysis",
+    github: "https://github.com/mo7medSa3d/Hatla2ee-Car-Scraper-Market-Analysis",
     image: "/images/projects/Hatlaa2e.webp",
   },
   {
@@ -162,7 +162,7 @@ export const PROJECTS = [
       "Interactive Power BI decision system with KPIs, trends and drill-down intelligence.",
     tech: ["Power BI", "DAX", "SQL", "Data Modeling"],
     color: "#fb923c",
-    github: "https://github.com/mo7amdSa3d/PowerBI-Sales-Dashboard",
+    github: "https://github.com/mo7medSa3d/PowerBI-Sales-Dashboard",
     image: "/images/projects/HCA.webp",
   },
 ];
@@ -201,7 +201,7 @@ export const FOOTER = {
 // =====================================================
 export const TERMINAL = {
   welcome: [
-    "MOHAMED AL-SHAER // NEURAL-ENGINE v2.0",
+    "MOHAMED SAAD // NEURAL-ENGINE v2.0",
     "Type 'help' to see available commands.",
   ],
   secureInterface: "mohamed@neural-engine: ~",
@@ -280,7 +280,7 @@ export const SKILL_CATEGORIES = [
 export const LOADER = {
   tagline: "Calibrating signal core…",
   headingLine1: "MOHAMED",
-  headingLine2: "AL-SHAER",
+  headingLine2: "Saad",
 };
 
 // =====================================================
