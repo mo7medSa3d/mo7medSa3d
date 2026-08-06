@@ -1,10 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import {
     AnimatePresence,
     motion,
     useMotionValue,
     useSpring,
+    useTransform,
+    type Variants,
 } from "framer-motion";
 import {
     useCallback,
@@ -17,6 +20,7 @@ import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
+    Activity,
     ArrowDown,
     ArrowUpRight,
     Download,
@@ -29,7 +33,24 @@ import {
     Terminal,
     X,
 } from "lucide-react";
-import { PROFILE, PROJECTS, SKILLS } from "@/constants/data";
+import {
+    PROFILE,
+    PROJECTS,
+    SKILLS,
+    HERO,
+    NAVIGATION_ITEMS,
+    NAV_LABELS,
+    ABOUT,
+    EXPERTISE,
+    PROJECTS_SECTION,
+    CONTACT_SECTION,
+    FOOTER,
+    TERMINAL,
+    SKILL_CATEGORIES,
+    LOADER,
+    UI,
+    SOCIALS,
+} from "@/constants/data";
 import { useTheme } from "@/hooks/useTheme";
 
 const AICore = dynamic(() => import("@/three/AICore"), {
@@ -42,21 +63,12 @@ const AICore = dynamic(() => import("@/three/AICore"), {
     ),
 });
 
+const CORE_AMBER = "#ffb454";
+const CORE_TEAL = "#5eead4";
+
 /* -------------------------------------------------------------------------- */
-/*  Constants                                                                  */
+/*  Themes                                                                     */
 /* -------------------------------------------------------------------------- */
-
-const NAV_LINKS = ["About", "Expertise", "Projects", "Contact"] as const;
-const NAV_SECTIONS = ["home", "about", "expertise", "projects", "contact"] as const;
-
-const LOADER_TICK_MS = 90;
-const LOADER_STEP = 11;
-const LOADER_EXIT_DELAY_MS = 450;
-
-const ROLE_ROTATE_MS = 3000;
-
-const SCROLL_COMPACT_THRESHOLD = 40;
-
 type ThemeVars = Record<
     | "--paper"
     | "--ink"
@@ -74,13 +86,10 @@ const DARK_THEME: ThemeVars = {
     "--paper": "#050505",
     "--ink": "#FAFAFA",
     "--muted": "#A1A1AA",
-
     "--glass": "rgba(255,255,255,.04)",
     "--line": "rgba(255,255,255,.08)",
-
     "--signal": "#FFFFFF",
     "--signal-2": "#D4D4D8",
-
     "--aurora-1": "rgba(255,255,255,.05)",
     "--aurora-2": "rgba(255,255,255,.02)",
 };
@@ -89,106 +98,32 @@ const LIGHT_THEME: ThemeVars = {
     "--paper": "#FCFCFC",
     "--ink": "#090909",
     "--muted": "#52525B",
-
     "--glass": "rgba(255,255,255,.78)",
     "--line": "rgba(0,0,0,.08)",
-
     "--signal": "#090909",
     "--signal-2": "#3F3F46",
-
     "--aurora-1": "rgba(0,0,0,.035)",
     "--aurora-2": "rgba(0,0,0,.02)",
 };
 
-/** Skill category keyword matchers, evaluated in priority order. */
-const SKILL_CATEGORY_PATTERNS: [category: string, pattern: RegExp][] = [
-    ["Data", /(pandas|numpy|sql|etl|spark|airflow|data)/i],
-    ["Modeling", /(sklearn|scikit|tensorflow|pytorch|xgboost|ml|regression|cluster)/i],
-    ["Product", /(react|next|node|typescript|javascript|api|web)/i],
-];
-
-/** Buckets a flat skill string into a readable category without touching the source data shape. */
-function categorizeSkill(skill: string): string {
-    const match = SKILL_CATEGORY_PATTERNS.find(([, pattern]) => pattern.test(skill));
-    return match?.[0] ?? "Core Stack";
-}
-
 /* -------------------------------------------------------------------------- */
-/*  Custom Cursor                                                              */
+/*  Utility hooks                                                              */
 /* -------------------------------------------------------------------------- */
-
-function Cursor() {
-    const mx = useMotionValue(-100);
-    const my = useMotionValue(-100);
-    const x = useSpring(mx, { stiffness: 700, damping: 42 });
-    const y = useSpring(my, { stiffness: 700, damping: 42 });
-    const rx = useSpring(mx, { stiffness: 210, damping: 25 });
-    const ry = useSpring(my, { stiffness: 210, damping: 25 });
-    const [label, setLabel] = useState("");
-
-    useEffect(() => {
-        const m = (e: MouseEvent) => {
-            mx.set(e.clientX);
-            my.set(e.clientY);
-        };
-        const h = (e: MouseEvent) => {
-            const t = (e.target as HTMLElement).closest<HTMLElement>(
-                "[data-cursor],a,button"
-            );
-            setLabel(t?.dataset.cursor || (t ? "VIEW" : ""));
-        };
-        addEventListener("mousemove", m);
-        document.addEventListener("mouseover", h);
-        return () => {
-            removeEventListener("mousemove", m);
-            document.removeEventListener("mouseover", h);
-        };
-    }, []);
-
-    return (
-        <>
-            <motion.div
-                style={{ x, y }}
-                className="pointer-events-none fixed left-0 top-0 z-[150] hidden h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference md:block"
-            />
-            <motion.div
-                style={{ x: rx, y: ry }}
-                animate={{ width: label ? 72 : 34, height: label ? 72 : 34 }}
-                className="pointer-events-none fixed left-0 top-0 z-[149] hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-300/50 bg-cyan-300/5 text-[8px] font-bold tracking-widest text-cyan-200 backdrop-blur md:flex"
-            >
-                {label}
-            </motion.div>
-        </>
-    );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Hooks                                                                      */
-/* -------------------------------------------------------------------------- */
-
 function usePrefersReducedMotion(): boolean {
     const [reduced, setReduced] = useState(false);
-
     useEffect(() => {
         const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
         setReduced(mediaQuery.matches);
-
         const handleChange = (event: MediaQueryListEvent) => setReduced(event.matches);
         mediaQuery.addEventListener("change", handleChange);
         return () => mediaQuery.removeEventListener("change", handleChange);
     }, []);
-
     return reduced;
 }
 
-/**
- * Throttles a scroll handler to at most once per animation frame,
- * avoiding layout thrashing on high-frequency scroll events.
- */
 function useRafThrottledScroll(callback: () => void, deps: React.DependencyList) {
     useEffect(() => {
         let frame: number | null = null;
-
         const onScroll = () => {
             if (frame !== null) return;
             frame = requestAnimationFrame(() => {
@@ -196,7 +131,6 @@ function useRafThrottledScroll(callback: () => void, deps: React.DependencyList)
                 frame = null;
             });
         };
-
         onScroll();
         window.addEventListener("scroll", onScroll, { passive: true });
         return () => {
@@ -210,10 +144,8 @@ function useRafThrottledScroll(callback: () => void, deps: React.DependencyList)
 /* -------------------------------------------------------------------------- */
 /*  Magnetic button wrapper                                                    */
 /* -------------------------------------------------------------------------- */
-
 interface MagneticProps {
     children: React.ReactNode;
-    /** Pull strength; higher values track the cursor more aggressively. */
     strength?: number;
 }
 
@@ -255,7 +187,6 @@ function Magnetic({ children, strength = 0.35 }: MagneticProps) {
 /* -------------------------------------------------------------------------- */
 /*  Ambient background                                                        */
 /* -------------------------------------------------------------------------- */
-
 function Background({ reduced }: { reduced: boolean }) {
     const auroraClass = reduced ? "" : "animate-[aurora_16s_ease-in-out_infinite]";
     const auroraReverseClass = reduced ? "" : "animate-[aurora_20s_ease-in-out_infinite_reverse]";
@@ -281,30 +212,75 @@ function Background({ reduced }: { reduced: boolean }) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Custom Cursor                                                              */
+/* -------------------------------------------------------------------------- */
+function Cursor() {
+    const mx = useMotionValue(-100);
+    const my = useMotionValue(-100);
+    const x = useSpring(mx, { stiffness: 700, damping: 42 });
+    const y = useSpring(my, { stiffness: 700, damping: 42 });
+    const rx = useSpring(mx, { stiffness: 210, damping: 25 });
+    const ry = useSpring(my, { stiffness: 210, damping: 25 });
+    const [label, setLabel] = useState("");
+
+    useEffect(() => {
+        const m = (e: MouseEvent) => {
+            mx.set(e.clientX);
+            my.set(e.clientY);
+        };
+        const h = (e: MouseEvent) => {
+            const t = (e.target as HTMLElement).closest<HTMLElement>("[data-cursor],a,button");
+            setLabel(t?.dataset.cursor || (t ? UI.cursorViewLabel : ""));
+        };
+        addEventListener("mousemove", m);
+        document.addEventListener("mouseover", h);
+        return () => {
+            removeEventListener("mousemove", m);
+            document.removeEventListener("mouseover", h);
+        };
+    }, []);
+
+    return (
+        <>
+            <motion.div
+                style={{ x, y }}
+                className="pointer-events-none fixed left-0 top-0 z-[150] hidden h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference md:block"
+            />
+            <motion.div
+                style={{ x: rx, y: ry }}
+                animate={{ width: label ? 72 : 34, height: label ? 72 : 34 }}
+                className="pointer-events-none fixed left-0 top-0 z-[149] hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-300/50 bg-cyan-300/5 text-[8px] font-bold tracking-widest text-cyan-200 backdrop-blur md:flex"
+            >
+                {label}
+            </motion.div>
+        </>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Rotating role headline                                                     */
 /* -------------------------------------------------------------------------- */
-
 function Roles() {
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
         const id = setInterval(
             () => setIndex((current) => (current + 1) % PROFILE.roles.length),
-            ROLE_ROTATE_MS,
+            UI.roleRotateMs,
         );
         return () => clearInterval(id);
     }, []);
 
     return (
-        <div className="h-14 overflow-hidden">
+        <div className="h-10 overflow-hidden sm:h-12">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={index}
-                    initial={{ opacity: 0, y: 25, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0)" }}
-                    exit={{ opacity: 0, y: -25, filter: "blur(10px)" }}
+                    initial={{ opacity: 0, y: 22, filter: "blur(10px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -22, filter: "blur(10px)" }}
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="bg-gradient-to-r from-[var(--signal)] to-[var(--signal-2)] bg-clip-text text-3xl font-semibold text-transparent"
+                    className="bg-gradient-to-r from-[var(--signal)] to-[var(--signal-2)] bg-clip-text text-2xl font-semibold text-transparent sm:text-3xl"
                 >
                     {PROFILE.roles[index]}
                 </motion.div>
@@ -314,23 +290,360 @@ function Roles() {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Hero – entrance choreography                                              */
+/* -------------------------------------------------------------------------- */
+function buildHeroVariants(reduced: boolean): { container: Variants; item: Variants } {
+    if (reduced) {
+        return {
+            container: { hidden: {}, show: { transition: { staggerChildren: 0.05 } } },
+            item: { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.4 } } },
+        };
+    }
+    return {
+        container: {
+            hidden: {},
+            show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+        },
+        item: {
+            hidden: { opacity: 0, y: 26, filter: "blur(8px)" },
+            show: {
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+                transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
+            },
+        },
+    };
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Hero – hover-lit magnetic CTA                                              */
+/* -------------------------------------------------------------------------- */
+interface ShineButtonProps {
+    href: string;
+    variant: "solid" | "ghost";
+    dataCursor?: string;
+    children: React.ReactNode;
+}
+
+function ShineButton({ href, variant, dataCursor, children }: ShineButtonProps) {
+    const ref = useRef<HTMLAnchorElement>(null);
+
+    const handleMove = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+        const rect = ref.current?.getBoundingClientRect();
+        if (!rect) return;
+        const px = ((event.clientX - rect.left) / rect.width) * 100;
+        const py = ((event.clientY - rect.top) / rect.height) * 100;
+        ref.current?.style.setProperty("--shine-x", `${px}%`);
+        ref.current?.style.setProperty("--shine-y", `${py}%`);
+    }, []);
+
+    const base =
+        "group relative isolate flex items-center gap-2 overflow-hidden rounded-full px-7 py-4 text-sm font-semibold transition-transform duration-300 hover:-translate-y-0.5";
+    const solid = "bg-[var(--ink)] text-[var(--paper)]";
+    const ghost = "border border-[var(--line)] text-[var(--ink)] hover:border-[var(--ink)]/40";
+
+    return (
+        <Magnetic strength={0.25}>
+            <a
+                ref={ref}
+                href={href}
+                onMouseMove={handleMove}
+                data-cursor={dataCursor}
+                className={`${base} ${variant === "solid" ? solid : ghost}`}
+                style={{ ["--shine-x" as string]: "50%", ["--shine-y" as string]: "50%" }}
+            >
+                <span
+                    aria-hidden="true"
+                    className={`pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${variant === "solid"
+                            ? "bg-[radial-gradient(circle_at_var(--shine-x)_var(--shine-y),rgba(255,255,255,0.25),transparent_60%)]"
+                            : "bg-[radial-gradient(circle_at_var(--shine-x)_var(--shine-y),var(--line),transparent_60%)]"
+                        }`}
+                />
+                <span className="relative z-10 flex items-center gap-2">{children}</span>
+            </a>
+        </Magnetic>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Hero – floating data readout                                              */
+/* -------------------------------------------------------------------------- */
+interface MetricChipProps {
+    metric: string;
+    label: string;
+    className?: string;
+}
+
+function MetricChip({ metric, label, className = "" }: MetricChipProps) {
+    return (
+        <div
+            className={`pointer-events-none flex flex-col rounded-2xl border border-[var(--line)] bg-[var(--glass)] px-4 py-3 backdrop-blur-xl shadow-[0_20px_60px_-20px_rgba(0,0,0,.5)] ${className}`}
+        >
+            <span className="text-lg font-bold leading-none text-[var(--ink)]">{metric}</span>
+            <span className="mt-1 text-[10px] uppercase tracking-[.2em] text-[var(--muted)]">
+                {label}
+            </span>
+        </div>
+    );
+}
+
+function SystemTag({ className = "" }: { className?: string }) {
+    return (
+        <div
+            className={`pointer-events-none flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--glass)] px-4 py-2 backdrop-blur-xl ${className}`}
+        >
+            <span className="relative flex h-2 w-2">
+                <span
+                    className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
+                    style={{ backgroundColor: CORE_AMBER }}
+                />
+                <span className="relative inline-flex h-2 w-2 rounded-full" style={{ backgroundColor: CORE_AMBER }} />
+            </span>
+            <Activity size={12} style={{ color: CORE_TEAL }} aria-hidden="true" />
+            <span className="font-mono text-[10px] uppercase tracking-[.25em] text-[var(--muted)]">
+                {UI.signalCoreLive}
+            </span>
+        </div>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Hero – visual composition (AI Core + portrait + chips)                    */
+/* -------------------------------------------------------------------------- */
+function VisualComposition({ reduced }: { reduced: boolean }) {
+    const wrapRef = useRef<HTMLDivElement>(null);
+    const rx = useMotionValue(0);
+    const ry = useMotionValue(0);
+    const px = useMotionValue(0);
+    const py = useMotionValue(0);
+    const srx = useSpring(rx, { stiffness: 120, damping: 20 });
+    const sry = useSpring(ry, { stiffness: 120, damping: 20 });
+    const spx = useSpring(px, { stiffness: 90, damping: 18 });
+    const spy = useSpring(py, { stiffness: 90, damping: 18 });
+
+    const portraitX = useTransform(spx, (v) => v * -14);
+    const portraitY = useTransform(spy, (v) => v * -14);
+    const chipAX = useTransform(spx, (v) => v * -30);
+    const chipAY = useTransform(spy, (v) => v * -30);
+    const chipBX = useTransform(spx, (v) => v * 16);
+    const chipBY = useTransform(spy, (v) => v * 16);
+
+    const handleMove = useCallback(
+        (event: React.MouseEvent<HTMLDivElement>) => {
+            if (reduced) return;
+            const rect = wrapRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            const relX = (event.clientX - rect.left) / rect.width - 0.5;
+            const relY = (event.clientY - rect.top) / rect.height - 0.5;
+            rx.set(-relY * 6);
+            ry.set(relX * 6);
+            px.set(relX);
+            py.set(relY);
+        },
+        [reduced, rx, ry, px, py],
+    );
+
+    const handleLeave = useCallback(() => {
+        rx.set(0);
+        ry.set(0);
+        px.set(0);
+        py.set(0);
+    }, [rx, ry, px, py]);
+
+    const firstProject = PROJECTS?.[0];
+
+    return (
+        <div
+            ref={wrapRef}
+            onMouseMove={handleMove}
+            onMouseLeave={handleLeave}
+            className="relative mx-auto h-[420px] w-full max-w-[420px] sm:h-[520px] sm:max-w-[520px] md:h-[680px] md:max-w-none lg:h-[800px]"
+        >
+            <motion.div
+                aria-hidden="true"
+                animate={reduced ? {} : { opacity: [0.35, 0.55, 0.35], scale: [1, 1.08, 1] }}
+                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                className="absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[110px]"
+                style={{ background: `radial-gradient(circle, ${CORE_AMBER}26 0%, transparent 70%)` }}
+            />
+            <motion.div
+                aria-hidden="true"
+                animate={reduced ? {} : { opacity: [0.22, 0.4, 0.22] }}
+                transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
+                className="absolute left-[62%] top-[42%] h-[55%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
+                style={{ background: `radial-gradient(circle, ${CORE_TEAL}22 0%, transparent 70%)` }}
+            />
+            <motion.div
+                style={{ rotateX: srx, rotateY: sry, transformPerspective: 1200 }}
+                className="relative h-full w-full will-change-transform"
+            >
+                <div className="absolute inset-0 -m-6 sm:-m-10 md:-m-16 lg:-m-24">
+                    <AICore />
+                </div>
+                <motion.div
+                    animate={reduced ? {} : { y: [0, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                    className="absolute left-1/2 top-1/2 z-10 h-[42%] w-[42%] max-h-[300px] max-w-[300px] -translate-x-1/2 -translate-y-1/2"
+                >
+                    <motion.div style={{ x: portraitX, y: portraitY }} className="relative h-full w-full">
+                        <div
+                            aria-hidden="true"
+                            className="absolute inset-0 rounded-full blur-2xl"
+                            style={{ background: `radial-gradient(circle, ${CORE_AMBER}33 0%, transparent 70%)` }}
+                        />
+                        <div
+                            className="relative h-full w-full overflow-hidden rounded-full p-[3px]"
+                            style={{
+                                backgroundImage: `linear-gradient(var(--paper), var(--paper)), linear-gradient(135deg, ${CORE_AMBER}, ${CORE_TEAL})`,
+                                backgroundOrigin: "border-box",
+                                backgroundClip: "content-box, border-box",
+                            }}
+                        >
+                            <Image
+                                src="/images/profile.webp"
+                                alt={PROFILE.fullName}
+                                width={600}
+                                height={734}
+                                priority
+                                quality={100}
+                                sizes="(min-width: 1024px) 300px, (min-width: 640px) 260px, 200px"
+                                className="h-full w-full rounded-full object-cover"
+                                style={{ objectPosition: "center top" }}
+                            />
+                        </div>
+                    </motion.div>
+                </motion.div>
+                {firstProject && (
+  <motion.div
+style={{ x: chipAX, y: chipAY }}
+    className="absolute left-[20%] top-[20%] hidden sm:block md:-left-10 lg:-left-16"
+  >
+    <MetricChip metric="Data Science" label="Python & ML" />
+  </motion.div>
+)}
+
+<SystemTag className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:bottom-6" />
+            </motion.div>
+        </div>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Hero section                                                              */
+/* -------------------------------------------------------------------------- */
+function Hero({ loaded, reduced }: { loaded: boolean; reduced: boolean }) {
+    const { container, item } = buildHeroVariants(reduced);
+
+    return (
+        <section
+            id="home"
+            className="relative isolate flex min-h-screen flex-col justify-center gap-14 px-6 pb-20 pt-32 md:gap-10 md:px-12 md:pb-0 md:pt-28"
+        >
+            <motion.div
+                variants={container}
+                initial="hidden"
+                animate={loaded ? "show" : "hidden"}
+                className="relative z-10 grid items-center gap-14 md:grid-cols-12 md:gap-6"
+            >
+                <div className="relative min-w-0 md:col-span-5">
+                    <motion.span
+                        variants={item}
+                        className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--glass)] px-4 py-2 text-xs backdrop-blur-xl"
+                    >
+                        <span className="relative flex h-1.5 w-1.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--signal)] opacity-60" />
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[var(--signal)]" />
+                        </span>
+                        {HERO.badgeText}
+                    </motion.span>
+
+                    <motion.h1
+                        variants={item}
+                        className="mt-8 text-[clamp(2.75rem,9vw,7.5rem)] font-semibold leading-[.84] tracking-[-.075em] text-[var(--ink)]"
+                    >
+                        {HERO.headingLine1}
+                        <br />
+                        <span className="text-[var(--muted)]">{HERO.headingLine2}</span>
+                    </motion.h1>
+
+                    <motion.div variants={item} className="mt-7">
+                        <p className="text-xs uppercase tracking-[.3em] text-[var(--muted)]">
+                            {HERO.subHeading}
+                        </p>
+                        <div className="mt-2">
+                            <Roles />
+                        </div>
+                    </motion.div>
+
+                    <motion.p
+                        variants={item}
+                        className="mt-2 max-w-md leading-8 text-[var(--muted)] sm:max-w-lg"
+                    >
+                        {PROFILE.bio}
+                    </motion.p>
+
+                    <motion.div variants={item} className="mt-10 flex flex-wrap items-center gap-3">
+                        <ShineButton href="#projects" variant="solid" dataCursor={UI.cursorExploreLabel}>
+                            {HERO.primaryButtonText} <ArrowDown size={16} aria-hidden="true" />
+                        </ShineButton>
+                        <ShineButton href="#contact" variant="ghost" dataCursor={UI.cursorContactLabel}>
+                            {HERO.secondaryButtonText}
+                        </ShineButton>
+                        <Magnetic strength={0.25}>
+                            <a
+                                href={PROFILE.resume}
+                                download
+                                aria-label={HERO.resumeButtonLabel}
+                                className="flex items-center justify-center rounded-full border border-[var(--line)] p-4 transition-colors hover:border-[var(--ink)]/40"
+                            >
+                                <Download size={18} aria-hidden="true" />
+                            </a>
+                        </Magnetic>
+                    </motion.div>
+                </div>
+
+                <div className="relative min-w-0 md:col-span-7 md:-mr-6 lg:-mr-16 xl:-mr-24">
+                    <motion.div variants={item}>
+                        <VisualComposition reduced={reduced} />
+                    </motion.div>
+                </div>
+            </motion.div>
+
+            <a
+                href="#about"
+                className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-xs text-[var(--muted)] md:flex"
+            >
+                {HERO.scrollIndicator}
+                <span className="relative h-10 w-px overflow-hidden bg-[var(--line)]">
+                    <motion.span
+                        animate={reduced ? {} : { y: ["-100%", "100%"] }}
+                        transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+                        className="absolute left-0 top-0 h-1/2 w-full bg-[var(--ink)]"
+                    />
+                </span>
+            </a>
+        </section>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Loading screen                                                             */
 /* -------------------------------------------------------------------------- */
-
-function Loader({ onDone }: { onDone: () => void }) {
+function LoaderScreen({ onDone }: { onDone: () => void }) {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         const id = setInterval(() => {
             setProgress((current) => {
-                const next = Math.min(100, current + LOADER_STEP);
+                const next = Math.min(100, current + UI.loaderStep);
                 if (next === 100) {
                     clearInterval(id);
-                    setTimeout(onDone, LOADER_EXIT_DELAY_MS);
+                    setTimeout(onDone, UI.loaderExitDelayMs);
                 }
                 return next;
             });
-        }, LOADER_TICK_MS);
+        }, UI.loaderTickMs);
         return () => clearInterval(id);
     }, [onDone]);
 
@@ -344,12 +657,12 @@ function Loader({ onDone }: { onDone: () => void }) {
         >
             <div className="w-[min(600px,85vw)]">
                 <p className="text-xs uppercase tracking-[.3em] text-[var(--signal)]">
-                    Calibrating signal core…
+                    {LOADER.tagline}
                 </p>
                 <h1 className="mt-10 text-5xl font-semibold text-white">
-                    MOHAMED
+                    {LOADER.headingLine1}
                     <br />
-                    <span className="text-white/30">AL-SHAER</span>
+                    <span className="text-white/30">{LOADER.headingLine2}</span>
                 </h1>
                 <div className="mt-12 h-px bg-white/10">
                     <div
@@ -366,7 +679,6 @@ function Loader({ onDone }: { onDone: () => void }) {
 /* -------------------------------------------------------------------------- */
 /*  Interactive terminal                                                       */
 /* -------------------------------------------------------------------------- */
-
 const COMMANDS = [
     "help",
     "whoami",
@@ -391,8 +703,8 @@ const WELCOME_ENTRY: HistoryEntry = {
     type: "output",
     text: (
         <div>
-            <div className="text-[var(--signal)]">MOHAMED AL-SHAER // NEURAL-ENGINE v2.0</div>
-            <div>Type &apos;help&apos; to see available commands.</div>
+            <div className="text-[var(--signal)]">{TERMINAL.welcome[0]}</div>
+            <div>{TERMINAL.welcome[1]}</div>
         </div>
     ),
 };
@@ -400,7 +712,7 @@ const WELCOME_ENTRY: HistoryEntry = {
 interface TerminalContactProps {
     onToggleTheme: () => void;
 }
-export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
+function TerminalContact({ onToggleTheme }: TerminalContactProps) {
     const [history, setHistory] = useState<HistoryEntry[]>([WELCOME_ENTRY]);
     const [input, setInput] = useState("");
     const [commandLog, setCommandLog] = useState<string[]>([]);
@@ -441,18 +753,9 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "help":
                     output = (
                         <div className="space-y-1">
-                            <div>Available commands:</div>
-                            <div>• whoami – About me</div>
-                            <div>• skills – My technical skills</div>
-                            <div>• projects – List case studies</div>
-                            <div>• email – My email address</div>
-                            <div>• github – My GitHub profile</div>
-                            <div>• linkedin – My LinkedIn profile</div>
-                            <div>• resume – Download my resume</div>
-                            <div>• theme – Toggle light / dark mode</div>
-                            <div>• date – Current date &amp; time</div>
-                            <div>• clear – Clear terminal</div>
-                            <div className="text-white/30">↑ / ↓ browse history · Tab to autocomplete</div>
+                            {TERMINAL.helpOutput.map((line, i) => (
+                                <div key={i}>{line}</div>
+                            ))}
                         </div>
                     );
                     break;
@@ -460,9 +763,9 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "whoami":
                     output = (
                         <div className="space-y-2">
-                            <div className="font-semibold text-cyan-300">{PROFILE.name}</div>
-                            <div className="text-white/70">{PROFILE.bio}</div>
-                            <div className="text-xs text-white/50">{PROFILE.university}</div>
+                            <div className="font-semibold text-cyan-300">{TERMINAL.whoamiName}</div>
+                            <div className="text-white/70">{TERMINAL.whoamiBio}</div>
+                            <div className="text-xs text-white/50">{TERMINAL.whoamiUniversity}</div>
                         </div>
                     );
                     break;
@@ -470,7 +773,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "skills":
                     output = (
                         <div className="space-y-1">
-                            <div className="text-white/70">Skills:</div>
+                            <div className="text-white/70">{TERMINAL.skillsLabel}</div>
                             <ul className="list-inside list-disc text-white/60">
                                 {SKILLS.map((skill) => (
                                     <li key={skill} className="text-sm">
@@ -490,8 +793,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                                     <span style={{ color: project.color }}>0{i + 1}</span>{" "}
                                     <span className="text-white/80">{project.title}</span>
                                     <span className="text-white/40">
-                                        {" "}
-                                        — {project.metric} {project.label}
+                                        {TERMINAL.projectItemPrefix}{project.metric} {project.label}
                                     </span>
                                 </div>
                             ))}
@@ -502,7 +804,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "email":
                     output = (
                         <div className="flex items-center gap-3">
-                            <span className="text-white/70">Email:</span>
+                            <span className="text-white/70">{TERMINAL.emailLabel}</span>
                             <a
                                 href={`mailto:${PROFILE.email}`}
                                 className="text-cyan-300 underline underline-offset-2"
@@ -517,7 +819,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "github":
                     output = (
                         <div className="flex items-center gap-3">
-                            <span className="text-white/70">GitHub:</span>
+                            <span className="text-white/70">{TERMINAL.githubLabel}</span>
                             <a
                                 href={PROFILE.github}
                                 target="_blank"
@@ -534,7 +836,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "linkedin":
                     output = (
                         <div className="flex items-center gap-3">
-                            <span className="text-white/70">LinkedIn:</span>
+                            <span className="text-white/70">{TERMINAL.linkedinLabel}</span>
                             <a
                                 href={PROFILE.linkedin}
                                 target="_blank"
@@ -551,14 +853,14 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 case "resume":
                     output = (
                         <div className="flex items-center gap-3">
-                            <span className="text-white/70">Resume:</span>
+                            <span className="text-white/70">{TERMINAL.resumeLabel}</span>
                             <a
                                 href={PROFILE.resume}
                                 download
                                 className="rounded-md border border-white/10 px-3 py-1 text-sm text-white/80 transition hover:bg-white/5"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                Download
+                                {TERMINAL.resumeDownload}
                             </a>
                         </div>
                     );
@@ -566,7 +868,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
 
                 case "theme":
                     onToggleTheme();
-                    output = "Theme toggled.";
+                    output = TERMINAL.themeToggled;
                     break;
 
                 case "date":
@@ -574,8 +876,8 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                     break;
 
                 default:
-                    output = `Command not found: "${command}". Type 'help' for available commands.`;
                     type = "error";
+                    output = `${TERMINAL.errorPrefix}${rawCommand}${TERMINAL.errorSuffix}`;
             }
 
             pushEntry(rawCommand, type, output);
@@ -620,7 +922,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
                 <div className="flex items-center gap-2 text-xs text-white/40">
                     <Terminal size={14} className="text-cyan-300" aria-hidden="true" />
-                    <span>mohamed@neural-engine: ~</span>
+                    <span>{TERMINAL.secureInterface}</span>
                 </div>
                 <div className="flex gap-1.5" aria-hidden="true">
                     <span className="h-3 w-3 rounded-full bg-red-500/80" />
@@ -637,13 +939,12 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                 {history.map((entry, i) => (
                     <div
                         key={i}
-                        className={`py-0.5 whitespace-pre-wrap ${
-                            entry.type === "prompt"
+                        className={`py-0.5 whitespace-pre-wrap ${entry.type === "prompt"
                                 ? "text-cyan-300"
                                 : entry.type === "error"
-                                ? "text-rose-400"
-                                : "text-white/70"
-                        }`}
+                                    ? "text-rose-400"
+                                    : "text-white/70"
+                            }`}
                     >
                         {entry.text}
                     </div>
@@ -653,7 +954,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
 
             <form onSubmit={handleSubmit} className="flex items-center gap-3 border-t border-white/10 px-4 py-3 sm:px-6 sm:py-4">
                 <span className="text-cyan-300" aria-hidden="true">
-                    $
+                    {TERMINAL.prompt}
                 </span>
                 <input
                     ref={inputRef}
@@ -665,7 +966,7 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
                     autoComplete="off"
                     spellCheck={false}
                     className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/20"
-                    placeholder="Enter a command…"
+                    placeholder={TERMINAL.placeholder}
                 />
             </form>
         </div>
@@ -673,21 +974,22 @@ export function TerminalContact({ onToggleTheme }: TerminalContactProps) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Skills constellation                                                       */
+/*  Skills constellation (about section)                                      */
 /* -------------------------------------------------------------------------- */
-
 function SkillsConstellation() {
     const groups = useMemo(() => {
         const map = new Map<string, string[]>();
         SKILLS.forEach((skill) => {
-            const category = categorizeSkill(skill);
-            map.set(category, [...(map.get(category) ?? []), skill]);
+            const category = SKILL_CATEGORIES.find((c) => c.pattern.test(skill))?.name ?? "Core Stack";
+            const existing = map.get(category) ?? [];
+            existing.push(skill);
+            map.set(category, existing);
         });
         return Array.from(map.entries());
     }, []);
 
     const [active, setActive] = useState<string | null>(null);
-    const activeCategory = active ? categorizeSkill(active) : null;
+    const activeCategory = active ? (SKILL_CATEGORIES.find((c) => c.pattern.test(active))?.name ?? "") : "";
 
     return (
         <div className="mx-auto mt-14 max-w-5xl">
@@ -730,191 +1032,265 @@ function SkillsConstellation() {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Project case study card                                                    */
+/*  Projects Section & Cards (Merged Component)                                */
 /* -------------------------------------------------------------------------- */
+function buildCardVariants(reduced: boolean): { grid: Variants; card: Variants } {
+    if (reduced) {
+        return {
+            grid: { hidden: {}, show: { transition: { staggerChildren: 0.04 } } },
+            card: { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.3 } } },
+        };
+    }
+    return {
+        grid: {
+            hidden: {},
+            show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
+        },
+        card: {
+            hidden: { opacity: 0, y: 80, rotateX: 8, filter: "blur(10px)" },
+            show: {
+                opacity: 1,
+                y: 0,
+                rotateX: 0,
+                filter: "blur(0px)",
+                transition: { type: "spring", stiffness: 220, damping: 24, mass: 0.9 },
+            },
+        },
+    };
+}
 
-interface ProjectCaseProps {
+function AbstractPreview({ color, seed }: { color: string; seed: number }) {
+    const nodes = [
+        [20 + (seed * 13) % 30, 30 + (seed * 7) % 25],
+        [55 + (seed * 11) % 30, 15 + (seed * 17) % 20],
+        [75 + (seed * 5) % 15, 55 + (seed * 19) % 25],
+        [30 + (seed * 23) % 25, 65 + (seed * 3) % 20],
+        [50, 45],
+    ];
+
+    return (
+        <div className="relative h-full w-full overflow-hidden rounded-t-[calc(1.75rem-3px)]">
+            <div
+                className="absolute inset-0"
+                style={{ background: `radial-gradient(120% 100% at 20% 0%, ${color}22 0%, transparent 55%)` }}
+            />
+            <div
+                className="absolute inset-0 opacity-40"
+                style={{ background: `radial-gradient(60% 60% at 80% 90%, ${color}30 0%, transparent 70%)` }}
+            />
+            <svg
+                viewBox="0 0 100 100"
+                preserveAspectRatio="xMidYMid slice"
+                className="absolute inset-0 h-full w-full"
+                aria-hidden="true"
+            >
+                <defs>
+                    <radialGradient id={`glow-${seed}`}>
+                        <stop offset="0%" stopColor={color} stopOpacity="0.9" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0" />
+                    </radialGradient>
+                </defs>
+                {nodes.map(([x1, y1], i) => {
+                    const [x2, y2] = nodes[(i + 1) % nodes.length];
+                    return (
+                        <line
+                            key={i}
+                            x1={x1}
+                            y1={y1}
+                            x2={x2}
+                            y2={y2}
+                            stroke={color}
+                            strokeOpacity={0.25}
+                            strokeWidth={0.3}
+                        />
+                    );
+                })}
+                {nodes.map(([x, y], i) => (
+                    <circle key={i} cx={x} cy={y} r={i === 4 ? 10 : 2.2} fill={`url(#glow-${seed})`} />
+                ))}
+                {nodes.map(([x, y], i) => (
+                    <circle key={`dot-${i}`} cx={x} cy={y} r={0.9} fill={color} />
+                ))}
+            </svg>
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,var(--paper)_100%)] opacity-60" />
+            <div className="absolute inset-0 backdrop-blur-[2px]" />
+        </div>
+    );
+}
+
+interface ProjectGridCardProps {
     project: (typeof PROJECTS)[number];
     index: number;
     onOpen: () => void;
+    cardVariants: Variants;
 }
 
-const CARD_TILT_STIFFNESS = 150;
-const CARD_TILT_DAMPING = 18;
-const CARD_TILT_DEGREES = 6;
+function ProjectGridCard({ project, index, onOpen, cardVariants }: ProjectGridCardProps) {
+    const ref = useRef<HTMLDivElement>(null);
 
-function ProjectCase({ project, index, onOpen }: ProjectCaseProps) {
-    const rotateX = useMotionValue(0);
-    const rotateY = useMotionValue(0);
-    const springRotateX = useSpring(rotateX, { stiffness: CARD_TILT_STIFFNESS, damping: CARD_TILT_DAMPING });
-    const springRotateY = useSpring(rotateY, { stiffness: CARD_TILT_STIFFNESS, damping: CARD_TILT_DAMPING });
+    const handleMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+        const rect = ref.current?.getBoundingClientRect();
+        if (!rect) return;
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        ref.current?.style.setProperty("--spot-x", `${x}%`);
+        ref.current?.style.setProperty("--spot-y", `${y}%`);
+    }, []);
 
-    const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const relativeX = (event.clientX - rect.left) / rect.width - 0.5;
-        const relativeY = (event.clientY - rect.top) / rect.height - 0.5;
-        rotateY.set(relativeX * CARD_TILT_DEGREES);
-        rotateX.set(-relativeY * CARD_TILT_DEGREES);
-    };
-
-    const handlePointerLeave = () => {
-        rotateX.set(0);
-        rotateY.set(0);
-    };
-
-    // Bounded so the result panel's tech list can never grow taller than its
-    // viewport-scaled budget, regardless of how many technologies a project lists.
-    const visibleTech = project.tech.slice(0, 4);
+    const visibleTech = project.tech.slice(0, 5);
 
     return (
-        <article
-            className="h-[min(82svh,720px)] w-full max-w-7xl overflow-hidden rounded-[clamp(1rem,1.5vw,2.25rem)] border border-[var(--line)] bg-[var(--glass)] p-[clamp(0.5rem,1vw+1.5svh,2rem)] shadow-[0_30px_120px_rgba(0,0,0,.75)] backdrop-blur-xl"
+        <motion.article
+            ref={ref}
+            variants={cardVariants}
+            onMouseMove={handleMove}
+            whileHover={{ y: -8, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300, damping: 22 }}
             style={{
-                zIndex: index + 1,
-                backgroundImage: `radial-gradient(circle at 80% 30%, ${project.color}22, transparent 32%)`,
+                ["--spot-x" as string]: "50%",
+                ["--spot-y" as string]: "50%",
+                ["--project-color" as string]: project.color,
+                transformPerspective: 1000,
             }}
+            className="group/card relative flex h-[560px] flex-col overflow-hidden rounded-[2rem] border border-[var(--line)] bg-[var(--glass)] shadow-[0_30px_80px_-40px_rgba(0,0,0,.55)] backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-500 hover:border-[color-mix(in_srgb,var(--project-color)_45%,var(--line))] hover:bg-[color-mix(in_srgb,var(--glass)_88%,transparent)] hover:shadow-[0_50px_110px_-40px_rgba(0,0,0,.65)] focus-within:border-[var(--project-color)]"
         >
-            <div className="mx-auto flex h-full w-full max-w-7xl flex-row items-center gap-[clamp(0.5rem,1.5vw,2.5rem)]">
-                <div
-                    data-reveal
-                    className="flex min-w-0 basis-[55%] flex-col justify-center overflow-hidden"
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-500 group-hover/card:opacity-100"
+                style={{
+                    background:
+                        "radial-gradient(360px circle at var(--spot-x) var(--spot-y), color-mix(in srgb, var(--project-color) 16%, transparent), transparent 65%)",
+                }}
+            />
+            <div
+                aria-hidden="true"
+                className="absolute left-0 top-0 z-10 h-[2px] w-0 transition-[width] duration-500 ease-out group-hover/card:w-full"
+                style={{ background: `linear-gradient(90deg, var(--project-color), transparent)` }}
+            />
+            <div className="relative h-[38%] shrink-0 border-b border-[var(--line)]">
+<div className="relative h-full w-full overflow-hidden rounded-t-[calc(1.75rem-3px)]">
+    {project.image ? (
+        <Image
+            src={project.image}
+            alt={project.title}
+            fill
+            className="object-cover transition-transform duration-700 group-hover/card:scale-110"
+            sizes="(max-width:768px) 100vw, 33vw"
+        />
+    ) : (
+        <AbstractPreview color={project.color} seed={index + 1} />
+    )}
+
+    <div
+        className="absolute inset-0"
+        style={{
+            background:
+                "linear-gradient(to top, rgba(10,13,18,.75), transparent)"
+        }}
+    />
+</div>                <span
+                    className="absolute left-4 top-4 z-10 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[.2em] backdrop-blur-xl"
+                    style={{ borderColor: `${project.color}55`, color: project.color, background: "var(--glass)" }}
                 >
-                    <p
-                        className="text-[clamp(.55rem,.5vw+.5svh,.75rem)] uppercase tracking-[.25em]"
-                        style={{ color: project.color }}
-                    >
-                        Case study — 0{index + 1} of {PROJECTS.length}
-                    </p>
-                    <h3 className="mt-[clamp(0.5rem,0.6vw+0.8svh,1rem)] break-words text-[clamp(1rem,2.2vw+1.6svh,4.5rem)] font-semibold leading-[.95] tracking-tight text-[var(--ink)]">
-                        {project.title}
-                    </h3>
-                    <p className="mt-[clamp(0.5rem,0.6vw+0.8svh,1rem)] overflow-hidden text-[clamp(.65rem,.5vw+.7svh,1rem)] leading-relaxed text-[var(--muted)] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] [display:-webkit-box]">
-                        {project.summary}
-                    </p>
-                    <div className="mt-[clamp(0.75rem,0.8vw+1svh,1.75rem)] flex flex-wrap gap-[clamp(0.25rem,0.4vw+0.4svh,0.5rem)]">
-                        {project.tech.map((tech) => (
-                            <span
-                                key={tech}
-                                className="whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--glass)] px-[clamp(0.4rem,0.5vw+0.3svh,0.75rem)] py-[clamp(0.15rem,0.2vw+0.2svh,0.25rem)] text-[clamp(.5rem,.4vw+.4svh,.8rem)] text-[var(--ink)] backdrop-blur-xl"
-                            >
-                                {tech}
-                            </span>
-                        ))}
+                    {PROJECTS_SECTION.caseStudyPrefix}0{index + 1}
+                </span>
+            </div>
+
+            <div className="flex flex-1 flex-col p-6">
+                <h3 className="text-2xl font-semibold leading-tight tracking-tight text-[var(--ink)]">
+                    {project.title}
+                </h3>
+                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[var(--muted)]">
+                    {project.summary}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                    {visibleTech.map((tech, i) => (
+                        <span
+                            key={tech}
+                            style={{ transitionDelay: `${i * 25}ms` }}
+                            className="translate-y-0 rounded-full border border-[var(--line)] bg-[var(--glass)] px-2.5 py-1 text-[11px] text-[var(--ink)] transition-transform duration-300 ease-out group-hover/card:-translate-y-0.5"
+                        >
+                            {tech}
+                        </span>
+                    ))}
+                </div>
+
+                <div className="mt-auto flex items-end justify-between gap-3 pt-6 relative z-20">
+                    <div>
+                        <p
+                            className="text-2xl font-bold leading-none"
+                            style={{ color: project.color }}
+                        >
+                            {project.metric}
+                        </p>
+                        <p className="mt-1 text-[11px] uppercase tracking-[.2em] text-[var(--muted)]">
+                            {project.label}
+                        </p>
                     </div>
-                    <Magnetic>
+
+                    <div className="flex items-center gap-2">
                         <button
                             type="button"
                             onClick={onOpen}
-                            data-cursor="OPEN"
-                            className="mt-[clamp(0.5rem,0.5vw+0.7svh,1rem)] flex w-fit items-center gap-2 rounded-full bg-[var(--ink)] px-[clamp(0.6rem,0.6vw+0.5svh,1.5rem)] py-[clamp(0.35rem,0.4vw+0.5svh,0.75rem)] text-[clamp(.6rem,.5vw+.5svh,.9rem)] font-medium text-[var(--paper)] transition-all duration-300 hover:scale-105 hover:opacity-90"
+                            aria-label={`View ${project.title} case study`}
+                            data-cursor={UI.cursorOpenLabel}
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition-transform hover:scale-105"
                         >
-                            View Case Study
-                            <ArrowUpRight size={18} aria-hidden="true" />
+                            <ArrowUpRight size={16} aria-hidden="true" />
                         </button>
-                    </Magnetic>
-                </div>
-
-                <motion.div
-                    onMouseMove={handlePointerMove}
-                    onMouseLeave={handlePointerLeave}
-                    style={{
-                        rotateX: springRotateX,
-                        rotateY: springRotateY,
-                        transformPerspective: 900,
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    className="relative flex min-w-0 basis-[45%] flex-col overflow-hidden rounded-[clamp(0.85rem,1.4vw,2rem)] border border-white/[0.08] bg-[#050505] p-[clamp(0.5rem,1vw+1.5svh,1.75rem)] text-white shadow-[0_30px_80px_rgba(0,0,0,.85)] backdrop-blur-2xl will-change-transform"
-                >
-                    <div
-                        className="absolute -right-[clamp(3rem,5vw+4svh,6rem)] -top-[clamp(3rem,5vw+4svh,6rem)] h-[clamp(6rem,10vw+8svh,14rem)] w-[clamp(6rem,10vw+8svh,14rem)] rounded-full blur-3xl"
-                        style={{ background: `${project.color}30` }}
-                    />
-
-                    <div className="relative flex items-start justify-between gap-[clamp(0.5rem,0.6vw+0.6svh,0.75rem)]">
-                        <div>
-                            <p className="text-[clamp(.5rem,.4vw+.4svh,.75rem)] uppercase tracking-[.25em] text-white/40">
-                                Project Result
-                            </p>
-                            <h4
-                                className="mt-[clamp(0.25rem,0.3vw+0.4svh,0.5rem)] text-[clamp(1.25rem,1.6vw+2.4svh,3.75rem)] font-bold"
-                                style={{ color: project.color }}
-                            >
-                                {project.metric}
-                            </h4>
-                            <p className="mt-[clamp(0.25rem,0.3vw+0.3svh,0.5rem)] text-[clamp(.55rem,.4vw+.5svh,.85rem)] text-white/50">
-                                {project.label}
-                            </p>
-                        </div>
-                        <div
-                            className="rounded-full border px-[clamp(0.5rem,0.5vw+0.4svh,0.75rem)] py-[clamp(0.15rem,0.2vw+0.2svh,0.25rem)] text-[clamp(.5rem,.35vw+.4svh,.75rem)]"
-                            style={{
-                                borderColor: `${project.color}55`,
-                                color: project.color,
-                            }}
+                        <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`View ${project.title} source on GitHub`}
+                            data-cursor={UI.cursorCodeLabel}
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] text-[var(--ink)] transition-colors hover:border-[var(--ink)]/40"
                         >
-                            LIVE
-                        </div>
+                            <Github size={16} aria-hidden="true" />
+                        </a>
                     </div>
-
-                    <div className="my-[clamp(0.75rem,0.8vw+1.2svh,2rem)] h-px bg-white/10" />
-
-                    <div className="flex flex-col gap-[clamp(0.4rem,0.5vw+0.7svh,1rem)]">
-                        {visibleTech.map((tech, i) => (
-                            <motion.div
-                                key={tech}
-                                whileHover={{ x: 5 }}
-                                className="group flex items-center justify-between rounded-[clamp(0.75rem,1vw,1rem)] border border-white/10 bg-white/[0.03] px-[clamp(0.5rem,0.6vw+0.6svh,1.25rem)] py-[clamp(0.35rem,0.4vw+0.6svh,1rem)]"
-                            >
-                                <div className="flex items-center gap-[clamp(0.4rem,0.5vw+0.4svh,0.75rem)]">
-                                    <div
-                                        className="flex h-[clamp(1.5rem,2vw+2svh,2.5rem)] w-[clamp(1.5rem,2vw+2svh,2.5rem)] items-center justify-center rounded-full text-[clamp(.55rem,.4vw+.5svh,.85rem)] font-semibold"
-                                        style={{
-                                            background: `${project.color}20`,
-                                            color: project.color,
-                                        }}
-                                    >
-                                        {String(i + 1).padStart(2, "0")}
-                                    </div>
-                                    <span className="text-[clamp(.65rem,.5vw+.6svh,1rem)]">
-                                        {tech}
-                                    </span>
-                                </div>
-                                <ArrowUpRight
-                                    size={16}
-                                    className="opacity-40 group-hover:translate-x-1 group-hover:-translate-y-1"
-                                />
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    <div className="mt-[clamp(0.5rem,0.6vw+0.8svh,1.5rem)] grid grid-cols-2 gap-[clamp(0.4rem,0.5vw+0.5svh,0.75rem)]">
-                        <div className="rounded-[clamp(0.75rem,1vw,1rem)] border border-white/10 p-[clamp(0.5rem,0.6vw+0.7svh,1.25rem)]">
-                            <p className="text-[clamp(.5rem,.35vw+.4svh,.75rem)] uppercase text-white/40">
-                                Stack
-                            </p>
-                            <b className="mt-[clamp(0.25rem,0.3vw+0.3svh,0.5rem)] block text-[clamp(.95rem,.8vw+1.2svh,1.875rem)]">
-                                {project.tech.length}
-                            </b>
-                        </div>
-                        <div className="rounded-[clamp(0.75rem,1vw,1rem)] border border-white/10 p-[clamp(0.5rem,0.6vw+0.7svh,1.25rem)]">
-                            <p className="text-[clamp(.5rem,.35vw+.4svh,.75rem)] uppercase text-white/40">
-                                Case Study
-                            </p>
-                            <b className="mt-[clamp(0.25rem,0.3vw+0.3svh,0.5rem)] block text-[clamp(.95rem,.8vw+1.2svh,1.875rem)]">
-                                0{index + 1}
-                            </b>
-                        </div>
-                    </div>
-                </motion.div>
+                </div>
             </div>
-        </article>
+        </motion.article>
+    );
+}
+
+function ProjectsSection({ onOpenProject }: { onOpenProject: (index: number) => void }) {
+    const reduced = usePrefersReducedMotion();
+    const variants = useMemo(() => buildCardVariants(reduced), [reduced]);
+
+    return (
+        <section id="projects" className="mx-auto max-w-7xl px-6 py-20 md:py-36">
+            <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-semibold">
+                {PROJECTS_SECTION.headingStart} <span className="text-[var(--muted)]">{PROJECTS_SECTION.headingEnd}</span>
+            </h2>
+
+            <motion.div
+                variants={variants.grid}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.15 }}
+                className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                style={{ perspective: 1200 }}
+            >
+                {PROJECTS.map((project, i) => (
+                    <ProjectGridCard
+                        key={project.title}
+                        project={project}
+                        index={i}
+                        onOpen={() => onOpenProject(i)}
+                        cardVariants={variants.card}
+                    />
+                ))}
+            </motion.div>
+        </section>
     );
 }
 
 /* -------------------------------------------------------------------------- */
 /*  Project modal                                                              */
 /* -------------------------------------------------------------------------- */
-
 function ProjectModal({ project, index, onClose }: { project: (typeof PROJECTS)[number]; index: number; onClose: () => void }) {
     return (
         <motion.div
@@ -946,7 +1322,7 @@ function ProjectModal({ project, index, onClose }: { project: (typeof PROJECTS)[
                 </button>
 
                 <p className="text-xs uppercase tracking-[.25em]" style={{ color: project.color }}>
-                    Case study — 0{index + 1}
+                    {PROJECTS_SECTION.caseStudyPrefix}0{index + 1}
                 </p>
                 <h2 className="mt-4 text-[clamp(1.75rem,4.5vw,3rem)] font-semibold">{project.title}</h2>
                 <p className="mt-8 max-w-3xl leading-8 text-white/60">{project.summary}</p>
@@ -972,10 +1348,10 @@ function ProjectModal({ project, index, onClose }: { project: (typeof PROJECTS)[
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 rounded-full bg-white px-6 py-4 text-black"
                     >
-                        <Github size={18} aria-hidden="true" /> Code
+                        <Github size={18} aria-hidden="true" /> {PROJECTS_SECTION.codeButton}
                     </a>
                     <a href="#contact" onClick={onClose} className="rounded-full border border-white/15 px-6 py-4">
-                        Discuss this project
+                        {PROJECTS_SECTION.discussProject}
                     </a>
                 </div>
             </motion.div>
@@ -986,18 +1362,15 @@ function ProjectModal({ project, index, onClose }: { project: (typeof PROJECTS)[
 /* -------------------------------------------------------------------------- */
 /*  Main portfolio page                                                        */
 /* -------------------------------------------------------------------------- */
-
 export default function Portfolio() {
     const [light, setLight] = useTheme();
     const [loaded, setLoaded] = useState(false);
     const [modalIndex, setModalIndex] = useState<number | null>(null);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [compact, setCompact] = useState(false);
-    const [activeSection, setActiveSection] = useState<string>(NAV_SECTIONS[0]);
+    const [activeSection, setActiveSection] = useState<string>(NAVIGATION_ITEMS[0].href.replace("#", ""));
     const [now, setNow] = useState<Date | null>(null);
     const reduced = usePrefersReducedMotion();
-    const projectsSection = useRef<HTMLElement>(null);
-    const projectsTrack = useRef<HTMLDivElement>(null);
     const scrollProgress = useMotionValue(0);
     const scrollProgressSpring = useSpring(scrollProgress, { stiffness: 130, damping: 28 });
 
@@ -1007,19 +1380,16 @@ export default function Portfolio() {
         window.scrollTo(0, 0);
     }, []);
 
-    // Scroll progress + navbar compaction, throttled to one update per frame.
     useRafThrottledScroll(() => {
         const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
         scrollProgress.set(window.scrollY / maxScroll);
-        setCompact(window.scrollY > SCROLL_COMPACT_THRESHOLD);
+        setCompact(window.scrollY > UI.scrollCompactThreshold);
     }, [scrollProgress]);
 
-    // Scroll-spy for nav active states.
     useEffect(() => {
-        const sections = NAV_SECTIONS.map((id) => document.getElementById(id)).filter(
+        const sections = NAVIGATION_ITEMS.map((item) => document.getElementById(item.href.replace("#", ""))).filter(
             (el): el is HTMLElement => el !== null,
         );
-
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -1028,19 +1398,16 @@ export default function Portfolio() {
             },
             { rootMargin: "-45% 0px -45% 0px" },
         );
-
         sections.forEach((section) => observer.observe(section));
         return () => observer.disconnect();
     }, [loaded]);
 
-    // Live clock for the footer.
     useEffect(() => {
         setNow(new Date());
         const id = setInterval(() => setNow(new Date()), 1000);
         return () => clearInterval(id);
     }, []);
 
-    // Escape closes the project modal and the mobile nav menu.
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
@@ -1052,12 +1419,9 @@ export default function Portfolio() {
         return () => window.removeEventListener("keydown", onKeyDown);
     }, []);
 
-    // GSAP scroll-triggered reveal animations & responsive matchMedia.
     useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
-
         const ctx = gsap.context(() => {
-            // Reveal animations for all devices
             gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
                 gsap.fromTo(
                     el,
@@ -1074,32 +1438,7 @@ export default function Portfolio() {
                     }
                 );
             });
-
-            // MatchMedia for Desktop Horizontal Scroll only!
-            const mm = gsap.matchMedia();
-
-            mm.add("(min-width: 0px)", () => {
-                if (projectsSection.current && projectsTrack.current) {
-                    const cards = gsap.utils.toArray(".project-card");
-
-                    gsap.to(cards, {
-                        xPercent: -100 * (cards.length - 1),
-                        ease: "none",
-                        scrollTrigger: {
-                            invalidateOnRefresh: true,
-                            trigger: projectsSection.current,
-                            pin: true,
-                            scrub: 1,
-                            start: "top top",
-                            end: () =>
-                                "+=" +
-                                (projectsTrack.current!.scrollWidth - window.innerWidth),
-                        },
-                    });
-                }
-            });
         });
-
         return () => ctx.revert();
     }, []);
 
@@ -1109,7 +1448,6 @@ export default function Portfolio() {
     return (
         <main
             style={themeVars as React.CSSProperties}
-            // Added md: prefix so the custom cursor is desktop-only, preventing touch issues on mobile
             className="md:cursor-none overflow-clip bg-[var(--paper)] text-[var(--ink)] transition-colors duration-700"
         >
             <a
@@ -1119,11 +1457,9 @@ export default function Portfolio() {
                 Skip to content
             </a>
 
-            <AnimatePresence>{!loaded && <Loader onDone={() => setLoaded(true)} />}</AnimatePresence>
+            <AnimatePresence>{!loaded && <LoaderScreen onDone={() => setLoaded(true)} />}</AnimatePresence>
 
             <Background reduced={reduced} />
-
-            {/* The integrated Cursor Component is rendered here */}
             <Cursor />
 
             <motion.div
@@ -1134,19 +1470,18 @@ export default function Portfolio() {
             {/* Navbar */}
             <nav className="fixed left-1/2 top-4 z-50 w-[min(900px,calc(100%-24px))] -translate-x-1/2 rounded-2xl border border-[var(--line)] bg-[var(--glass)] backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,.18)]">
                 <div
-                    className={`flex items-center justify-between px-4 transition-all duration-300 ${compact ? "h-14" : "h-16"
-                        }`}
+                    className={`flex items-center justify-between px-4 transition-all duration-300 ${compact ? "h-14" : "h-16"}`}
                 >
-                    <b className="text-sm text-[var(--ink)]">MA / Mohamed Al-Shaer</b>
+                    <b className="text-sm text-[var(--ink)]">{PROFILE.initials} / {PROFILE.fullName}</b>
 
                     <div className="hidden items-center gap-1 md:flex">
-                        {NAV_LINKS.map((link) => {
-                            const id = link.toLowerCase();
+                        {NAVIGATION_ITEMS.map((item) => {
+                            const id = item.href.replace("#", "");
                             const isActive = activeSection === id;
                             return (
                                 <a
-                                    key={link}
-                                    href={`#${id}`}
+                                    key={id}
+                                    href={item.href}
                                     aria-current={isActive ? "true" : undefined}
                                     className={`relative rounded-full px-4 py-2 text-sm transition-colors ${isActive ? "text-[var(--ink)]" : "text-[var(--muted)] hover:text-[var(--ink)]"
                                         }`}
@@ -1158,7 +1493,7 @@ export default function Portfolio() {
                                             className="absolute inset-0 -z-10 rounded-full bg-[var(--signal)]/12"
                                         />
                                     )}
-                                    {link}
+                                    {item.label}
                                 </a>
                             );
                         })}
@@ -1197,21 +1532,21 @@ export default function Portfolio() {
                             className="overflow-hidden border-t border-[var(--line)] md:hidden"
                         >
                             <div className="flex flex-col gap-1 p-3">
-                                {NAV_LINKS.map((link) => {
-                                    const id = link.toLowerCase();
+                                {NAVIGATION_ITEMS.map((item) => {
+                                    const id = item.href.replace("#", "");
                                     const isActive = activeSection === id;
                                     return (
                                         <a
-                                            key={link}
-                                            href={`#${id}`}
+                                            key={id}
+                                            href={item.href}
                                             onClick={() => setMobileNavOpen(false)}
                                             aria-current={isActive ? "true" : undefined}
                                             className={`rounded-xl px-4 py-3 text-sm transition-colors ${isActive
-                                                ? "bg-[var(--signal)]/12 text-[var(--ink)]"
-                                                : "text-[var(--muted)] hover:bg-[var(--line)] hover:text-[var(--ink)]"
+                                                    ? "bg-[var(--signal)]/12 text-[var(--ink)]"
+                                                    : "text-[var(--muted)] hover:bg-[var(--line)] hover:text-[var(--ink)]"
                                                 }`}
                                         >
-                                            {link}
+                                            {item.label}
                                         </a>
                                     );
                                 })}
@@ -1222,108 +1557,21 @@ export default function Portfolio() {
             </nav>
 
             {/* Hero */}
-            <section
-                id="home"
-                className="relative flex flex-col gap-14 px-6 pb-20 pt-28 md:grid md:min-h-screen md:grid-cols-2 md:items-center md:gap-10 md:px-12 md:pb-0 md:pt-24"
-            >
-                <div className="relative z-10 min-w-0">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--glass)] px-4 py-2 text-xs">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--signal)]" aria-hidden="true" />
-                        Available for high-impact opportunities
-                    </span>
-                    <h1 className="mt-9 text-[clamp(2.75rem,9vw,7.5rem)] font-semibold leading-[.84] tracking-[-.075em]">
-                        Mohamed
-                        <br />
-                        <span className="text-[var(--muted)]">Al-Shaer.</span>
-                    </h1>
-                    <div className="mt-8">
-                        <Roles />
-                    </div>
-                    <p className="mt-5 max-w-xl leading-8 text-[var(--muted)]">
-                        Computer and Data Science student at Alexandria University building
-                        production-minded AI, predictive analytics, automation and business
-                        intelligence systems.
-                    </p>
-                    <div className="mt-8 flex flex-wrap gap-3">
-                        <Magnetic>
-                            <a
-                                href="#projects"
-                                data-cursor="EXPLORE"
-                                className="flex items-center gap-2 rounded-full bg-[var(--ink)] px-6 py-4 font-semibold text-[var(--paper)]"
-                            >
-                                Explore work <ArrowDown size={18} aria-hidden="true" />
-                            </a>
-                        </Magnetic>
-                        <Magnetic>
-                            <a
-                                href="#contact"
-                                data-cursor="CONTACT"
-                                className="rounded-full border border-[var(--line)] px-6 py-4"
-                            >
-                                Contact
-                            </a>
-                        </Magnetic>
-                        <Magnetic>
-                            <a
-                                href={PROFILE.resume}
-                                download
-                                aria-label="Download résumé"
-                                className="rounded-full border border-[var(--line)] p-4"
-                            >
-                                <Download aria-hidden="true" />
-                            </a>
-                        </Magnetic>
-                    </div>
-                </div>
-
-                <div className="relative min-w-0">
-                    <div className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[.35em] text-[var(--muted)] md:hidden">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--signal)]" aria-hidden="true" />
-                        Signal Core
-                    </div>
-                    <div className="relative mx-auto h-[320px] w-full max-w-md overflow-hidden sm:h-[400px] md:h-[720px] md:max-w-none md:rounded-none md:border-none md:bg-transparent md:backdrop-blur-none">
-                        <AICore />
-                    </div>
-                </div>
-
-                <a
-                    href="#about"
-                    className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-xs text-[var(--muted)] md:flex"
-                >
-                    Scroll
-                    <motion.span
-                        animate={reduced ? {} : { y: [0, 8, 0] }}
-                        transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-                    >
-                        <ArrowDown size={14} aria-hidden="true" />
-                    </motion.span>
-                </a>
-            </section>
+            <Hero loaded={loaded} reduced={reduced} />
 
             {/* About */}
             <section id="about" className="mx-auto max-w-7xl px-6 py-20 md:py-36">
                 <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-semibold">
-                    Engineering intelligence for{" "}
-                    <span className="text-[var(--muted)]">real business problems.</span>
+                    {ABOUT.headingStart} <span className="text-[var(--muted)]">{ABOUT.headingEnd}</span>
                 </h2>
                 <div data-reveal className="mt-14 grid gap-5 md:grid-cols-2">
                     <div className="rounded-[2rem] border border-[var(--line)] bg-[var(--glass)] p-6 md:p-9">
                         <p className="text-xl leading-relaxed sm:text-2xl md:text-3xl">
-                            I specialize in machine learning, predictive analytics, data
-                            engineering, automation and business intelligence — turning raw,
-                            messy datasets into systems people can actually act on.
+                            {ABOUT.description}
                         </p>
                     </div>
                     <div className="space-y-4">
-                        {[
-                            {
-                                title: "Machine Learning",
-                                items: ["Regression", "Data Mining", "Model Evaluation", "Classification", "Feature Engineering"],
-                            },
-                            { title: "Data Analytics", items: ["Power BI", "SQL", "Excel", "Dashboard Design"] },
-                            { title: "Automation", items: ["Playwright", "Selenium", "Web Scraping"] },
-                            { title: "Deployment", items: ["Flask", "FastAPI", "Docker"] },
-                        ].map((section) => (
+                        {ABOUT.sections.map((section) => (
                             <div
                                 key={section.title}
                                 className="group rounded-[2rem] border border-[var(--line)] bg-[var(--glass)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--signal)]"
@@ -1355,7 +1603,7 @@ export default function Portfolio() {
             {/* Expertise */}
             <section id="expertise" className="border-y border-[var(--line)] px-6 py-20 md:py-36 text-center">
                 <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-semibold">
-                    A connected intelligence stack.
+                    {EXPERTISE.heading}
                 </h2>
                 <div data-reveal>
                     <SkillsConstellation />
@@ -1363,34 +1611,12 @@ export default function Portfolio() {
             </section>
 
             {/* Projects */}
-            <section
-                id="projects"
-                ref={projectsSection}
-                className="relative h-screen min-h-screen overflow-hidden"
-            >
-                <div
-                    ref={projectsTrack}
-                    className="flex h-screen flex-row items-center"
-                >
-                    {PROJECTS.map((project, i) => (
-                        <div
-                            key={project.title}
-                            className="project-card flex h-screen w-screen shrink-0 items-center justify-center px-[clamp(0.5rem,1.5vw+1svh,3rem)]"
-                        >
-                            <ProjectCase
-                                project={project}
-                                index={i}
-                                onOpen={() => setModalIndex(i)}
-                            />
-                        </div>
-                    ))}
-                </div>
-            </section>
+            <ProjectsSection onOpenProject={setModalIndex} />
 
             {/* Contact */}
             <section id="contact" className="mx-auto max-w-7xl px-6 py-20 md:py-36">
                 <h2 data-reveal className="text-[clamp(2.25rem,7vw,6rem)] font-semibold">
-                    Let&apos;s build the next <span className="text-[var(--muted)]">intelligent product.</span>
+                    {CONTACT_SECTION.headingStart} <span className="text-[var(--muted)]">{CONTACT_SECTION.headingEnd}</span>
                 </h2>
                 <div data-reveal className="mt-14">
                     <TerminalContact onToggleTheme={toggleTheme} />
@@ -1401,12 +1627,12 @@ export default function Portfolio() {
             <footer className="border-t border-[var(--line)] p-6 sm:p-10">
                 <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <b className="text-xl">Mohamed Al-Shaer</b>
-                        <p className="text-[var(--muted)]">Data Scientist · Machine Learning Engineer</p>
+                        <b className="text-xl">{FOOTER.name}</b>
+                        <p className="text-[var(--muted)]">{FOOTER.role}</p>
                     </div>
                     <div className="flex gap-3">
                         <a
-                            href={PROFILE.github}
+                            href={SOCIALS.github}
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="GitHub"
@@ -1415,7 +1641,7 @@ export default function Portfolio() {
                             <Github size={16} aria-hidden="true" />
                         </a>
                         <a
-                            href={PROFILE.linkedin}
+                            href={SOCIALS.linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="LinkedIn"
@@ -1423,18 +1649,18 @@ export default function Portfolio() {
                         >
                             <Linkedin size={16} aria-hidden="true" />
                         </a>
-                        <a href={`mailto:${PROFILE.email}`} aria-label="Email" className="rounded-full border border-[var(--line)] p-3">
+                        <a href={`mailto:${SOCIALS.email}`} aria-label="Email" className="rounded-full border border-[var(--line)] p-3">
                             <Mail size={16} aria-hidden="true" />
                         </a>
                     </div>
                     <div className="text-left md:text-right">
-                        <p className="text-sm text-[var(--muted)]">Alexandria, Egypt</p>
+                        <p className="text-sm text-[var(--muted)]">{FOOTER.location}</p>
                         <p className="tabular-nums text-sm text-[var(--muted)]">
                             {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "--:--"}
                         </p>
                     </div>
                 </div>
-                <p className="mx-auto mt-8 max-w-7xl tracking-widest text-[var(--muted)]">DATA. MODELS. AUTOMATION.</p>
+                <p className="mx-auto mt-8 max-w-7xl tracking-widest text-[var(--muted)]">{FOOTER.tagline}</p>
             </footer>
 
             {/* Project modal */}

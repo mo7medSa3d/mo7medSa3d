@@ -226,8 +226,8 @@ function Scene() {
   });
 
   return (
-    <group ref={group}>
-      <ambientLight intensity={0.4} />
+<group ref={group} scale={0.72}>
+        <ambientLight intensity={0.4} />
       <pointLight position={[3, 3, 3]} intensity={1.3} color={SIGNAL} />
       <pointLight position={[-3, -2, -2]} intensity={0.85} color={SIGNAL_2} />
       <Glow />
