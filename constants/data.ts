@@ -155,6 +155,24 @@ export const PROJECTS = [
     image: "/images/projects/Hatlaa2e.webp",
   },
   {
+    title: "Interactive HR Analytics Dashboard",
+    metric: "1.4K+",
+    label: "HR records",
+    summary:
+      "Interactive Business Intelligence dashboard built with Microsoft Power BI to analyze employee demographics, workforce distribution, salary insights, and attrition. Features advanced DAX measures, Power Query transformations, data modeling, and dynamic filtering for executive HR decision-making.",
+    tech: [
+      "Power BI",
+      "DAX",
+      "Power Query",
+      "Data Modeling",
+      "Business Intelligence"
+    ],
+    color: "#F2C811",
+    github:
+      "https://github.com/mo7medSa3d/Interactive-HR-Analytics-Dashboard",
+    image: "/images/projects/HR.webp",
+  },
+  {
     title: "Healthcare Analytics Dashboard",
     metric: "23.8K+",
     label: "Healthcare records",
