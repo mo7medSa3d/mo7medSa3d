@@ -1,32 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1024" height="1024" style="width: 100%; height: auto; max-width: 1024px;">
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 512 512"
+  width="1024"
+  height="1024"
+  style="width:100%;height:auto;max-width:1024px;"
+>
   <defs>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFF2B2"/>
-      <stop offset="0.25" stop-color="#F5D76E"/>
-      <stop offset="0.55" stop-color="#D8A62A"/>
-      <stop offset="1" stop-color="#A87412"/>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="45%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
     </linearGradient>
 
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#181818"/>
-      <stop offset="100%" stop-color="#050505"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F1117"/>
+      <stop offset="100%" stop-color="#07080B"/>
     </linearGradient>
+
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 
   <!-- Background -->
-  <circle cx="256" cy="256" r="246" fill="url(#bg)"/>
-
-  <!-- Gold Ring -->
   <circle
-      cx="256"
-      cy="256"
-      r="218"
-      fill="none"
-      stroke="url(#gold)"
-      stroke-width="18"/>
+    cx="256"
+    cy="256"
+    r="246"
+    fill="url(#bg)"
+  />
 
-  <!-- MS Monogram -->
-  <g fill="url(#gold)">
+  
+  <!-- MS Monogram - enlarged -->
+  <g
+    fill="url(#brand)"
+    transform="translate(256 256) scale(1.12) translate(-256 -256)"
+  >
 
     <!-- Left M -->
     <path d="
@@ -42,9 +55,10 @@
       L228 261
       L178 198
       V360
-      Z"/>
+      Z
+    "/>
 
-    <!-- Right S (minimal geometric) -->
+    <!-- Right S -->
     <path d="
       M332 176
       C332 152 349 140 378 140
@@ -63,7 +77,8 @@
       C395 249 388 244 373 239
       L359 234
       C339 227 332 209 332 190
-      Z"/>
+      Z
+    "/>
 
   </g>
 </svg>

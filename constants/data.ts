@@ -21,7 +21,7 @@ export const PROFILE = {
   // الوصف الذي يظهر في الهيرو والـ Terminal whoami
   bio: "Computer and Data Science student at Alexandria University building production-minded AI, predictive analytics, automation and business intelligence systems.",
   github: "https://github.com/mo7medSa3d",
-  linkedin: "www.linkedin.com/in/mo7medsa3d",
+  linkedin: "https://www.linkedin.com/in/mo7medsa3d",
   resume: "/resume.pdf",
   availabilityStatus: "Available for high-impact opportunities",
 };

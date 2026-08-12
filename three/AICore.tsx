@@ -21,9 +21,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-const SIGNAL = "#ffb454";
-const SIGNAL_2 = "#5eead4";
-const SIGNAL_3 = "#9aa5b1";
+const SIGNAL = "#3B82F6";
+const SIGNAL_2 = "#8B5CF6";
+const SIGNAL_3 = "#22D3EE";
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -226,8 +226,8 @@ function Scene() {
   });
 
   return (
-<group ref={group} scale={0.72}>
-        <ambientLight intensity={0.4} />
+    <group ref={group} scale={0.72}>
+      <ambientLight intensity={0.4} />
       <pointLight position={[3, 3, 3]} intensity={1.3} color={SIGNAL} />
       <pointLight position={[-3, -2, -2]} intensity={0.85} color={SIGNAL_2} />
       <Glow />
