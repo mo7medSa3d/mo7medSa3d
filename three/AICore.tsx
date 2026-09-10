@@ -21,9 +21,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-const SIGNAL = "#3B82F6";
-const SIGNAL_2 = "#8B5CF6";
-const SIGNAL_3 = "#22D3EE";
+const SIGNAL = "#C19A4B";
+const SIGNAL_2 = "#6BA99E";
+const SIGNAL_3 = "#8A7B5A";
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);

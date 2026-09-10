@@ -23,13 +23,10 @@ import {
   Download,
   ExternalLink,
   Github,
-  Globe,
-  Layers,
   Linkedin,
   Mail,
   Menu,
   Moon,
-  Sparkles,
   Sun,
   Terminal,
   TrendingUp,
@@ -38,11 +35,13 @@ import {
 import {
   PROFILE,
   PROJECTS,
+  PROJECTS_SECTION,
   SKILLS,
   HERO,
   NAVIGATION_ITEMS,
   ABOUT,
   EXPERTISE,
+  EXPERIENCE,
   CONTACT_SECTION,
   FOOTER,
   TERMINAL,
@@ -92,35 +91,32 @@ type ThemeVars = Record<
   string
 >;
 
-const CORE_AMBER = "#8B5CF6";
-const CORE_TEAL = "#3B82F6";
+const CORE_AMBER = "#C19A4B";
+const CORE_TEAL = "#6BA99E";
 
 const DARK_THEME: ThemeVars = {
-  "--paper": "#07080B",
-  "--paper-2": "#0F1117",
-  "--ink": "#F8FAFC",
-  "--muted": "#94A3B8",
-  // Raised from #64748B: at 9-10px with wide tracking this label color is used
-  // constantly (metrics, eyebrows, timestamps) and needs to clear 4.5:1 on
-  // both surfaces, not just body copy.
-  "--muted-2": "#7C8AA0",
-  "--glass": "rgba(15, 17, 23, 0.72)",
-  "--glass-border": "rgba(255, 255, 255, 0.12)",
-  "--glass-border-strong": "rgba(255, 255, 255, 0.22)",
-  "--card": "#12141B",
-  "--card-border": "rgba(255, 255, 255, 0.10)",
-  "--line": "rgba(255, 255, 255, 0.08)",
-  "--signal": "#3B82F6",
-  "--signal-2": "#8B5CF6",
-  "--signal-wash": "rgba(59, 130, 246, 0.16)",
-  "--focus": "#5EB1FF",
-  "--success": "#34D399",
-  "--warning": "#FBBF24",
-  "--error": "#FB7185",
-  "--aurora-1": "rgba(59, 130, 246, 0.14)",
-  "--aurora-2": "rgba(139, 92, 246, 0.10)",
-  "--shadow": "0 10px 40px -10px rgba(0,0,0,0.6)",
-  "--shadow-heavy": "0 25px 80px -15px rgba(0,0,0,0.8)",
+  "--paper": "#0A0D0C",
+  "--paper-2": "#141918",
+  "--ink": "#EDE9DE",
+  "--muted": "#A8A699",
+  "--muted-2": "#8B897D",
+  "--glass": "rgba(20, 25, 24, 0.78)",
+  "--glass-border": "rgba(237, 233, 222, 0.12)",
+  "--glass-border-strong": "rgba(193, 154, 75, 0.38)",
+  "--card": "#121614",
+  "--card-border": "rgba(237, 233, 222, 0.10)",
+  "--line": "rgba(237, 233, 222, 0.09)",
+  "--signal": "#C19A4B",
+  "--signal-2": "#6BA99E",
+  "--signal-wash": "rgba(193, 154, 75, 0.14)",
+  "--focus": "#D8B96A",
+  "--success": "#6BA99E",
+  "--warning": "#C19A4B",
+  "--error": "#C96F4A",
+  "--aurora-1": "rgba(193, 154, 75, 0.10)",
+  "--aurora-2": "rgba(107, 169, 158, 0.08)",
+  "--shadow": "0 1px 0 rgba(0,0,0,0.4), 0 16px 40px -16px rgba(0,0,0,0.7)",
+  "--shadow-heavy": "0 2px 0 rgba(0,0,0,0.4), 0 32px 64px -20px rgba(0,0,0,0.8)",
 };
 
 /* ----------------------------------------------------------------------- *
@@ -136,37 +132,28 @@ const DARK_THEME: ThemeVars = {
  *  than "invisible."
  * ----------------------------------------------------------------------- */
 const LIGHT_THEME: ThemeVars = {
-  "--paper": "#F4F4F6",
+  "--paper": "#F5F3EC",
   "--paper-2": "#FFFFFF",
-  "--ink": "#16171B",
-  "--muted": "#48484F",
-  // Was #64748B (~4.6:1 on the old #F8FAFC paper) — too close to the AA
-  // floor for 9-10px tracked-out mono labels. #6B6B74 clears ~5.3:1 on
-  // both --paper and --paper-2/--card.
-  "--muted-2": "#6B6B74",
-  // Card surfaces are now near-opaque white so they visibly separate from
-  // the gray page instead of blending into it (was 0.82 alpha on an
-  // almost-identical paper color — that's the "washed out" bug).
-  "--glass": "rgba(255, 255, 255, 0.92)",
-  "--glass-border": "rgba(15, 15, 20, 0.12)",
-  "--glass-border-strong": "rgba(15, 15, 20, 0.18)",
+  "--ink": "#161915",
+  "--muted": "#4E4E46",
+  "--muted-2": "#6E6C60",
+  "--glass": "rgba(255, 255, 255, 0.88)",
+  "--glass-border": "rgba(22, 25, 21, 0.12)",
+  "--glass-border-strong": "rgba(138, 100, 32, 0.32)",
   "--card": "#FFFFFF",
-  "--card-border": "rgba(15, 15, 20, 0.09)",
-  "--line": "rgba(15, 15, 20, 0.08)",
-  "--signal": "#0A6CFF",
-  "--signal-2": "#7C3AED",
-  "--signal-wash": "rgba(10, 108, 255, 0.08)",
-  "--focus": "#0A6CFF",
-  "--success": "#059669",
-  "--warning": "#B45309",
-  "--error": "#DC2626",
-  "--aurora-1": "rgba(10, 108, 255, 0.07)",
-  "--aurora-2": "rgba(124, 58, 237, 0.05)",
-  // Two-layer shadows (tight contact shadow + soft ambient falloff) is
-  // what makes Stripe/Linear surfaces feel "lifted" instead of just
-  // outlined. A single soft blur alone reads as flat on white.
-  "--shadow": "0 1px 2px rgba(16,16,20,0.04), 0 10px 28px -10px rgba(16,16,20,0.14)",
-  "--shadow-heavy": "0 4px 12px rgba(16,16,20,0.06), 0 32px 64px -16px rgba(16,16,20,0.20)",
+  "--card-border": "rgba(22, 25, 21, 0.09)",
+  "--line": "rgba(22, 25, 21, 0.10)",
+  "--signal": "#8A6420",
+  "--signal-2": "#2F6F62",
+  "--signal-wash": "rgba(138, 100, 32, 0.10)",
+  "--focus": "#8A6420",
+  "--success": "#2F6F62",
+  "--warning": "#8A6420",
+  "--error": "#A34A2A",
+  "--aurora-1": "rgba(138, 100, 32, 0.08)",
+  "--aurora-2": "rgba(47, 111, 98, 0.06)",
+  "--shadow": "0 1px 0 rgba(22,25,21,0.05), 0 12px 28px -14px rgba(22,25,21,0.22)",
+  "--shadow-heavy": "0 1px 0 rgba(22,25,21,0.06), 0 28px 56px -20px rgba(22,25,21,0.28)",
 };
 
 /* -------------------------------------------------------------------------- */
@@ -185,28 +172,15 @@ interface TechBrandConfig {
   bg: string;
 }
 
-const TECH_BRAND_MAP: Record<string, TechBrandConfig> = {
-  "React": { color: "#61DAFB", border: "rgba(97,218,251,0.3)", bg: "rgba(97,218,251,0.08)" },
-  "Next.js 14": { color: "#3B82F6", border: "rgba(59,130,246,0.3)", bg: "rgba(59,130,246,0.08)" },
-  "Next.js": { color: "#3B82F6", border: "rgba(59,130,246,0.3)", bg: "rgba(59,130,246,0.08)" },
-  "TypeScript": { color: "#3178C6", border: "rgba(49,120,198,0.3)", bg: "rgba(49,120,198,0.08)" },
-  "Rust": { color: "#DEA584", border: "rgba(222,165,132,0.3)", bg: "rgba(222,165,132,0.08)" },
-  "Wasm": { color: "#654FF0", border: "rgba(101,79,240,0.3)", bg: "rgba(101,79,240,0.08)" },
-  "Tailwind CSS": { color: "#06B6D4", border: "rgba(6,182,212,0.3)", bg: "rgba(6,182,212,0.08)" },
-  "Tailwind": { color: "#06B6D4", border: "rgba(6,182,212,0.3)", bg: "rgba(6,182,212,0.08)" },
-  "Python": { color: "#F59E0B", border: "rgba(245,158,11,0.3)", bg: "rgba(245,158,11,0.08)" },
-  "Docker": { color: "#2496ED", border: "rgba(36,150,237,0.3)", bg: "rgba(36,150,237,0.08)" },
-  "Framer Motion": { color: "#A855F7", border: "rgba(168,85,247,0.3)", bg: "rgba(168,85,247,0.08)" },
-};
+/* Tech chips stay quiet ledger labels. Color is reserved for data and
+   the single brass accent, so stack names render in mono on paper. */
 
-function getTechBrand(techName: string): TechBrandConfig {
-  return (
-    TECH_BRAND_MAP[techName] || {
-      color: "#94A3B8",
-      border: "rgba(148,163,184,0.25)",
-      bg: "rgba(148,163,184,0.06)",
-    }
-  );
+function getTechBrand(_techName: string): TechBrandConfig {
+  return {
+    color: "var(--muted)",
+    border: "var(--glass-border)",
+    bg: "var(--paper-2)",
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -392,7 +366,7 @@ function Roles() {
             stiffness: 260,
             damping: 22,
           }}
-          className="bg-gradient-to-r from-[var(--signal)] to-[var(--signal-2)] bg-clip-text text-2xl font-semibold text-transparent sm:text-3xl"
+          className="text-2xl font-semibold text-[var(--ink)] sm:text-3xl"
         >
           {PROFILE.roles[index]}
         </motion.div>
@@ -459,10 +433,10 @@ function ShineButton({ href, variant, dataCursor, children }: ShineButtonProps) 
 function MetricChip({ metric, label, className = "" }: { metric: string; label: string; className?: string }) {
   return (
     <div
-      className={`pointer-events-none flex flex-col rounded-2xl border border-[var(--glass-border)] bg-[var(--glass)] px-5 py-4 backdrop-blur-2xl shadow-[var(--shadow)] ${className}`}
+      className={`pointer-events-none flex flex-col rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] px-5 py-4 backdrop-blur-2xl shadow-[var(--shadow)] ${className}`}
     >
-      <span className="text-xl font-extrabold leading-none text-[var(--ink)]">{metric}</span>
-      <span className="mt-1.5 text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--muted-2)]">
+      <span className="font-mono text-xl font-semibold leading-none tabular-nums text-[var(--ink)]">{metric}</span>
+      <span className="mt-1.5 text-[13px] text-[var(--muted)]">
         {label}
       </span>
     </div>
@@ -485,7 +459,7 @@ function SystemTag({ className = "" }: { className?: string }) {
         />
       </span>
       <Activity size={14} style={{ color: CORE_TEAL }} aria-hidden="true" />
-      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]">
+      <span className="text-[13px] text-[var(--muted)]">
         {UI.signalCoreLive}
       </span>
     </div>
@@ -660,18 +634,16 @@ function Hero({ loaded, reduced }: { loaded: boolean; reduced: boolean }) {
 
           <motion.h1
             variants={item}
-            className="mt-8 text-[clamp(2.75rem,8.5vw,7rem)] font-bold leading-[0.88] tracking-[-0.06em] text-[var(--ink)]"
+            className="mt-8 text-balance text-[clamp(2.75rem,8.5vw,6.5rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--ink)]"
           >
-            {HERO.headingLine1}
-            <br />
-            <span className="font-light text-[var(--muted)]">{HERO.headingLine2}</span>
+            {HERO.headingLine1} {HERO.headingLine2}
           </motion.h1>
 
-          <motion.div variants={item} className="mt-7">
-            <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted-2)]">
+          <motion.div variants={item} className="mt-6 border-l-2 border-[var(--signal)] pl-4">
+            <p className="text-sm text-[var(--muted)]">
               {HERO.subHeading}
             </p>
-            <div className="mt-2">
+            <div className="mt-1">
               <Roles />
             </div>
           </motion.div>
@@ -736,16 +708,14 @@ function LoaderScreen({ onDone }: { onDone: () => void }) {
       aria-live="polite"
       aria-label={`Loading portfolio, ${progress}% complete`}
       exit={{ opacity: 0, filter: "blur(15px)" }}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-[#07080B]"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-[#0A0D0C]"
     >
       <div className="w-[min(600px,85vw)]">
-        <p className="text-xs font-mono uppercase tracking-[0.3em] text-[var(--signal)]">
+        <p className="font-mono text-sm text-[var(--signal)]">
           {LOADER.tagline}
         </p>
-        <h1 className="mt-10 text-5xl font-bold tracking-tight text-white">
-          {LOADER.headingLine1}
-          <br />
-          <span className="text-white/30 font-light">{LOADER.headingLine2}</span>
+        <h1 className="mt-8 text-5xl font-semibold tracking-tight text-[#EDE9DE]">
+          {LOADER.headingLine1} {LOADER.headingLine2}
         </h1>
         <div className="mt-12 h-[2px] w-full bg-white/10">
           <div
@@ -778,16 +748,31 @@ const WELCOME_ENTRY: HistoryEntry = {
   ),
 };
 
+const TERMINAL_COMMANDS = [
+  "help",
+  "whoami",
+  "skills",
+  "projects",
+  "email",
+  "github",
+  "linkedin",
+  "resume",
+  "theme",
+  "date",
+  "clear",
+] as const;
+
 function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
   const [history, setHistory] = useState<HistoryEntry[]>([WELCOME_ENTRY]);
   const [input, setInput] = useState("");
-  const [, setCommandLog] = useState<string[]>([]);
-  const [, setHistoryCursor] = useState(-1);
+  const [commandLog, setCommandLog] = useState<string[]>([]);
+  const [historyCursor, setHistoryCursor] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [history]);
 
   const pushEntry = useCallback(
@@ -914,6 +899,16 @@ function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
           onToggleTheme();
           output = TERMINAL.themeToggled;
           break;
+        case "date":
+          output = new Date().toLocaleString([], {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          break;
         default:
           type = "error";
           output = `${TERMINAL.errorPrefix}${rawCommand}${TERMINAL.errorSuffix}`;
@@ -927,6 +922,36 @@ function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (input.trim()) handleCommand(input);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (commandLog.length === 0) return;
+      const next = historyCursor === -1 ? commandLog.length - 1 : Math.max(0, historyCursor - 1);
+      setHistoryCursor(next);
+      setInput(commandLog[next] ?? "");
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (historyCursor === -1) return;
+      const next = historyCursor + 1;
+      if (next >= commandLog.length) {
+        setHistoryCursor(-1);
+        setInput("");
+      } else {
+        setHistoryCursor(next);
+        setInput(commandLog[next] ?? "");
+      }
+    } else if (event.key === "Tab") {
+      event.preventDefault();
+      const fragment = input.trim().toLowerCase();
+      if (!fragment) return;
+      const match = TERMINAL_COMMANDS.find((c) => c.startsWith(fragment));
+      if (match) {
+        setInput(match);
+        setHistoryCursor(-1);
+      }
+    }
   };
 
   return (
@@ -944,9 +969,10 @@ function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
       </div>
 
       <div
+        ref={logRef}
         role="log"
         aria-live="polite"
-        className="min-h-[280px] max-h-[380px] overflow-y-auto p-6 font-mono text-xs sm:text-sm leading-relaxed"
+        className="custom-scrollbar min-h-[280px] max-h-[380px] overflow-y-auto p-6 font-mono text-xs sm:text-sm leading-relaxed"
       >
         {history.map((entry, i) => (
           <div
@@ -961,12 +987,12 @@ function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
             {entry.text}
           </div>
         ))}
-        <div ref={endRef} />
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="flex items-center gap-3 border-t border-white/10 px-6 py-4 bg-white/[0.01] transition-colors focus-within:bg-white/[0.03]"
+        onClick={() => inputRef.current?.focus()}
+        className="flex cursor-text items-center gap-3 border-t border-white/10 px-6 py-4 bg-white/[0.01] transition-colors focus-within:bg-white/[0.03]"
       >
         <span className="text-cyan-300 font-mono" aria-hidden="true">
           {TERMINAL.prompt}
@@ -975,9 +1001,14 @@ function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
           ref={inputRef}
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            setHistoryCursor(-1);
+          }}
+          onKeyDown={handleKeyDown}
           aria-label="Terminal command input"
           autoComplete="off"
+          autoCapitalize="off"
           spellCheck={false}
           className="flex-1 bg-transparent font-mono text-xs sm:text-sm text-white outline-none placeholder:text-white/20 caret-[var(--focus)]"
           placeholder={TERMINAL.placeholder}
@@ -1005,21 +1036,20 @@ function SkillsConstellation() {
 
   return (
     <div className="mx-auto mt-14 max-w-5xl">
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-8 text-left">
         {groups.map(([category, items]) => (
-          <div key={category}>
-            <p className="mb-4 text-left text-xs font-mono uppercase tracking-[0.25em] text-[var(--muted-2)]">
+          <div key={category} className="border-t border-[var(--line)] pt-5">
+            <p className="mb-3 text-[15px] font-semibold text-[var(--ink)]">
               {category}
             </p>
-            <div className="flex flex-wrap justify-center gap-3 md:justify-start">
+            <div className="flex flex-wrap justify-start gap-2">
               {items.map((skill) => (
-                <motion.div
+                <span
                   key={skill}
-                  whileHover={{ scale: 1.05, y: -3 }}
-                  className="rounded-full border border-[var(--glass-border)] bg-[var(--glass)] px-5 py-2.5 text-xs font-semibold text-[var(--ink)] backdrop-blur-xl shadow-[var(--shadow)]"
+                  className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] px-4 py-2 text-[13px] text-[var(--ink)]"
                 >
                   {skill}
-                </motion.div>
+                </span>
               ))}
             </div>
           </div>
@@ -1057,7 +1087,7 @@ export interface ProjectGridCardProps {
 /*  Fallback Compact Canvas Preview                                           */
 /* -------------------------------------------------------------------------- */
 const FallbackProductPreview: FC<{ color: string; seed: number }> = ({ color, seed }) => (
-  <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#0B0D14] via-[#10131D] to-[#07080B] p-4">
+  <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#121614] p-4">
     <div
       className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"
       style={{ maskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, #000 70%, transparent 100%)" }}
@@ -1165,7 +1195,7 @@ export function ProjectGridCard({
         ref={cardRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full overflow-hidden rounded-[2rem] border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--shadow)] transition-shadow duration-500 hover:shadow-[var(--shadow-heavy)] sm:rounded-[2.5rem]"
+        className="relative w-full overflow-hidden rounded-[20px] border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--shadow)] transition-shadow duration-500 hover:shadow-[var(--shadow-heavy)]"
       >
         {/* Animated accent border — a 1px ring that fades in on hover using
             the project's own color, instead of a static border everywhere. */}
@@ -1210,7 +1240,7 @@ export function ProjectGridCard({
                   src={project.image}
                   alt={`${project.title} preview`}
                   loading="lazy"
-                  className="h-full w-full object-full object-top transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
+                  className="h-full w-full object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
                 />
               ) : (
                 <FallbackProductPreview color={project.color} seed={index + 1} />
@@ -1234,52 +1264,41 @@ export function ProjectGridCard({
             }}
           />
 
-          {/* Index / case tag sits on the image, Apple-keynote style */}
-          <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3.5 py-1.5 backdrop-blur-md sm:left-7 sm:top-7">
+          <div className="absolute left-5 top-5 flex items-center gap-2 rounded-lg border border-white/20 bg-black/45 px-3 py-1.5 backdrop-blur-md sm:left-7 sm:top-7">
             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: project.color }} />
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-white">
-              {caseStudyPrefix}
-              {String(index + 1).padStart(2, "0")}
+            <span className="text-[13px] text-white">
+              {project.tech[0]}
             </span>
           </div>
         </div>
 
-        {/* ---- Content: full width, generous breathing room ---- */}
         <div className="relative z-20 p-5 sm:p-8 md:p-10">
           <div className="max-w-3xl">
-            <h3 className="text-balance text-2xl font-extrabold tracking-tight text-[var(--ink)] sm:text-3xl md:text-[2.35rem]">
+            <h3 className="text-balance text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
               {project.title}
             </h3>
-            <p className="mt-4 max-w-2xl text-pretty text-base leading-relaxed text-[var(--muted)] sm:text-lg">
+            <p className="mt-4 max-w-2xl text-pretty text-[17px] leading-relaxed text-[var(--muted)]">
               {project.summary}
             </p>
           </div>
 
           <div className="mt-5 flex flex-wrap gap-2" aria-label="Technologies used">
-            {project.tech.map((tech) => {
-              const brand = getTechBrand(tech);
-              return (
-                <span
-                  key={tech}
-                  style={{ color: brand.color, borderColor: brand.border, backgroundColor: brand.bg }}
-                  className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-300 hover:-translate-y-px hover:shadow-sm"
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: brand.color, boxShadow: `0 0 6px ${brand.color}` }}
-                  />
-                  {tech}
-                </span>
-              );
-            })}
+            {project.tech.map((tech) => (
+              <span
+                key={tech}
+                className="rounded-md border border-[var(--glass-border)] bg-[var(--paper-2)] px-2.5 py-1 font-mono text-xs text-[var(--muted)]"
+              >
+                {tech}
+              </span>
+            ))}
           </div>
 
-          <div className="mt-6 flex flex-col gap-6 border-t border-[var(--glass-border)] pt-6 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="text-3xl font-extrabold tracking-tight sm:text-4xl" style={{ color: project.color }}>
+          <div className="mt-6 flex flex-col gap-6 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-baseline gap-3">
+              <div className="font-mono text-3xl font-semibold tabular-nums tracking-tight text-[var(--ink)]">
                 {project.metric}
               </div>
-              <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--muted-2)]">
+              <div className="text-sm text-[var(--muted)]">
                 {project.label}
               </div>
             </div>
@@ -1290,9 +1309,8 @@ export function ProjectGridCard({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                aria-label={`View ${project.title} repository`}
-                style={{ borderColor: `${project.color}55`, color: project.color, backgroundColor: `${project.color}12` }}
-                className={`grid h-11 w-11 place-items-center rounded-full border transition-all duration-300 hover:scale-110 ${FOCUS_RING}`}
+                aria-label={`Open ${project.title} code on GitHub`}
+                className={`grid h-11 w-11 place-items-center rounded-full border border-[var(--glass-border)] text-[var(--muted)] transition-colors hover:border-[var(--signal)] hover:text-[var(--ink)] ${FOCUS_RING}`}
               >
                 <Github className="h-4 w-4" aria-hidden="true" />
               </a>
@@ -1300,13 +1318,12 @@ export function ProjectGridCard({
               <button
                 type="button"
                 onClick={onOpen}
-                aria-label={`Open case study for ${project.title}`}
-                style={{ backgroundColor: project.color }}
-                className={`group/btn relative inline-flex h-11 items-center gap-2 rounded-full px-6 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all duration-300 hover:scale-[1.03] hover:shadow-lg ${FOCUS_RING}`}
+                aria-label={`Read notes on ${project.title}`}
+                className={`group/btn relative inline-flex h-11 items-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--signal)] hover:text-white ${FOCUS_RING}`}
               >
-                <span>Case Study</span>
+                <span>Read notes</span>
                 <ArrowUpRight
-                  className="h-3.5 w-3.5 transition-transform duration-300 group-hover/btn:-translate-y-0.5 group-hover/btn:translate-x-0.5"
+                  className="h-4 w-4"
                   aria-hidden="true"
                 />
               </button>
@@ -1368,15 +1385,13 @@ export function ProjectModal({
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: "spring", stiffness: 300, damping: 28 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative z-10 flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] border border-[var(--glass-border-strong)] bg-[var(--card)] text-[var(--ink)] shadow-[var(--shadow-heavy)]"
+          className="relative z-10 flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[20px] border border-[var(--glass-border-strong)] bg-[var(--card)] text-[var(--ink)] shadow-[var(--shadow-heavy)]"
         >
-          {/* Top bar */}
           <div className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--glass-border)] bg-[var(--card)] px-6 py-3.5">
             <div className="flex items-center gap-2.5">
-              <span className="rounded-full border border-[var(--glass-border)] bg-[var(--paper)] px-2.5 py-0.5 text-[11px] font-mono font-semibold" style={{ color: project.color }}>
-                {caseStudyPrefix}{String(index + 1).padStart(2, "0")}
+              <span className="rounded-md border border-[var(--glass-border)] bg-[var(--paper)] px-2.5 py-1 text-[13px] text-[var(--muted)]">
+                {project.tech[0]}
               </span>
-              <span className="hidden text-xs font-mono text-[var(--muted)] sm:inline-block">Deep Dive</span>
             </div>
             <button
               type="button"
@@ -1388,57 +1403,40 @@ export function ProjectModal({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 custom-scrollbar">
-            {/* Hero card */}
-            <div className="relative overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--paper)] p-6">
-              <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full blur-[90px] opacity-30" style={{ backgroundColor: project.color }} />
+          <div className="flex-1 space-y-7 overflow-y-auto p-6 sm:p-8 custom-scrollbar">
+            <div className="relative overflow-hidden rounded-xl border border-[var(--glass-border)] bg-[var(--paper)] p-6">
               <div className="relative z-10 max-w-2xl">
-                <h2 id="project-modal-title" className="text-2xl font-extrabold sm:text-3xl tracking-tight text-[var(--ink)]">
+                <h2 id="project-modal-title" className="text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
                   {project.title}
                 </h2>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+                <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--muted)]">
                   {project.description || project.summary}
                 </p>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-xl border border-[var(--glass-border)] bg-[var(--card)] p-3.5 shadow-sm transition hover:scale-[1.02]">
-                  <div className="text-xl sm:text-2xl font-extrabold" style={{ color: project.color }}>
+                <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--card)] p-4">
+                  <div className="font-mono text-xl font-semibold tabular-nums text-[var(--ink)] sm:text-2xl">
                     {project.metric}
                   </div>
-                  <div className="mt-0.5 text-[9px] font-mono uppercase tracking-wider text-[var(--muted-2)]">
+                  <div className="mt-1 text-[13px] text-[var(--muted)]">
                     {project.label}
                   </div>
                 </div>
 
-                <div className="col-span-1 rounded-xl border border-[var(--glass-border)] bg-[var(--card)] p-3.5 shadow-sm sm:col-span-3 flex flex-col justify-center transition hover:scale-[1.01]">
-                  <div className="text-[9px] font-mono uppercase tracking-wider text-[var(--muted-2)] mb-1.5">
-                    Stack Ecosystem
+                <div className="col-span-1 flex flex-col justify-center rounded-lg border border-[var(--glass-border)] bg-[var(--card)] p-4 sm:col-span-3">
+                  <div className="mb-2 text-[13px] text-[var(--muted)]">
+                    Built with
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {project.tech.map((t) => {
-                      const brand = getTechBrand(t);
-                      return (
-                        <span
-                          key={t}
-                          style={{
-                            color: brand.color,
-                            borderColor: brand.border,
-                            backgroundColor: brand.bg,
-                          }}
-                          className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-all duration-300 hover:scale-[1.03] hover:-translate-y-px"
-                        >
-                          <span
-                            className="h-1 w-1 rounded-full"
-                            style={{
-                              backgroundColor: brand.color,
-                              boxShadow: `0 0 6px ${brand.color}`,
-                            }}
-                          />
-                          {t}
-                        </span>
-                      );
-                    })}
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tech.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-md border border-[var(--glass-border)] bg-[var(--paper)] px-2.5 py-1 font-mono text-xs text-[var(--muted)]"
+                      >
+                        {t}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1449,26 +1447,25 @@ export function ProjectModal({
               <div className="overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--card)] shadow-[var(--shadow)]">
                 <img
                   src={project.image}
-                  alt={project.title}
-                  className="w-full object-full aspect-[16/10]"
+                  alt={`${project.title} screenshots`}
+                  loading="lazy"
+                  className="w-full object-cover aspect-[16/10]"
                 />
               </div>
             )}
 
-            {/* Highlights */}
             {project.highlights && project.highlights.length > 0 && (
               <div>
-                <h3 className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-[var(--muted-2)]">
-                  <Sparkles className="h-3.5 w-3.5" style={{ color: project.color }} />
-                  Key Impact Highlights
+                <h3 className="text-[15px] font-semibold text-[var(--ink)]">
+                  Notes from the build
                 </h3>
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {project.highlights.map((item, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-2.5 rounded-xl border border-[var(--glass-border)] bg-[var(--paper)] p-3 text-xs text-[var(--ink)]/80 transition hover:scale-[1.02]"
+                      className="flex items-start gap-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--paper)] p-3 text-sm text-[var(--muted)]"
                     >
-                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: project.color }} />
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--signal)]" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -1477,33 +1474,26 @@ export function ProjectModal({
             )}
           </div>
 
-          {/* Footer */}
           <div className="sticky bottom-0 z-30 flex items-center justify-between gap-3 border-t border-[var(--glass-border)] bg-[var(--card)] px-6 py-4">
             <div className="flex items-center gap-2">
               <a
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center gap-2 rounded-full border px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] ${FOCUS_RING}`}
-                style={{
-                  borderColor: project.color,
-                  color: project.color,
-                  backgroundColor: `${project.color}15`,
-                }}
+                className={`flex items-center gap-2 rounded-full border border-[var(--glass-border)] px-5 py-2.5 text-sm font-semibold text-[var(--ink)] transition-colors hover:border-[var(--signal)] ${FOCUS_RING}`}
               >
-                <Github className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>GitHub</span>
+                <Github className="h-4 w-4" aria-hidden="true" />
+                <span>Open code</span>
               </a>
               {project.liveUrl && (
                 <a
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--paper)] transition-all hover:scale-[1.03] ${FOCUS_RING}`}
-                  style={{ backgroundColor: project.color }}
+                  className={`flex items-center gap-2 rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--signal)] hover:text-white ${FOCUS_RING}`}
                 >
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Live Demo</span>
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  <span>Open live page</span>
                 </a>
               )}
             </div>
@@ -1520,36 +1510,34 @@ export function ProjectModal({
 /* -------------------------------------------------------------------------- */
 export function ProjectsSection({
   projects = [],
-  sectionHeading = { start: "Selected", end: "Projects" },
-  caseStudyPrefix = "CASE — ",
+  sectionHeading = PROJECTS_SECTION.heading,
+  caseStudyPrefix = "",
   onOpenProject,
 }: {
   projects?: ProjectItem[];
-  sectionHeading?: { start: string; end: string };
+  sectionHeading?: string | { start: string; end: string };
   caseStudyPrefix?: string;
   onOpenProject?: (index: number) => void;
 }) {
   const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
 
   const activeProject = selectedProjectIndex !== null ? projects[selectedProjectIndex] : null;
+  const headingText =
+    typeof sectionHeading === "string"
+      ? sectionHeading
+      : `${sectionHeading.start} ${sectionHeading.end}`;
 
   return (
     <section id="projects" aria-labelledby="projects-heading" className="relative mx-auto max-w-[96rem] scroll-mt-28 px-4 py-20 sm:px-6 md:py-28 lg:px-8">
-      <div className="pointer-events-none absolute left-1/2 top-10 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-blue-500/10 blur-[130px]" />
-
       <div className="mx-auto max-w-5xl">
-        <div className="flex flex-col gap-6 border-b border-[var(--glass-border)] pb-10 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-[0.25em] text-[var(--muted-2)]">
-              <Layers className="h-4 w-4 text-[var(--signal)]" aria-hidden="true" />
-              Crafted Showcase
-            </div>
-            <h2 id="projects-heading" className="mt-3 text-balance text-[clamp(2.25rem,5vw,4.5rem)] font-extrabold leading-[0.98] tracking-[-0.04em] text-[var(--ink)]">
-              {sectionHeading.start} <span className="font-light text-[var(--muted)]">{sectionHeading.end}</span>
+        <div className="flex flex-col gap-6 border-b border-[var(--line)] pb-8 md:flex-row md:items-end md:justify-between">
+          <div className="border-l-2 border-[var(--signal)] pl-4">
+            <h2 id="projects-heading" className="text-balance text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--ink)]">
+              {headingText}
             </h2>
           </div>
-          <p className="max-w-md text-pretty text-xs leading-relaxed text-[var(--muted)] md:text-right sm:text-sm">
-            High-performance applications, interactive software architectures, and digital products engineered for scale.
+          <p className="max-w-md text-pretty text-[15px] leading-relaxed text-[var(--muted)] md:text-right">
+            {PROJECTS_SECTION.description}
           </p>
         </div>
       </div>
@@ -1635,24 +1623,26 @@ export default function Portfolio() {
   }, []);
 
   useEffect(() => {
+    if (reduced) return;
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
         gsap.fromTo(
           el,
-          { opacity: 0, y: 40 },
+          { opacity: 0, y: 16 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.8,
-            ease: "power3.out",
-            scrollTrigger: { trigger: el, start: "top 85%" },
+            duration: 0.6,
+            ease: "power2.out",
+            overwrite: true,
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
           }
         );
       });
     });
     return () => ctx.revert();
-  }, []);
+  }, [reduced]);
 
   const themeVars = useMemo<ThemeVars>(() => (light ? LIGHT_THEME : DARK_THEME), [light]);
   const activeProject = modalIndex !== null ? PROJECTS[modalIndex] : null;
@@ -1676,10 +1666,9 @@ export default function Portfolio() {
       <Background reduced={reduced} />
       <Cursor />
 
-      {/* Progress Line */}
       <motion.div
         style={{ scaleX: scrollProgressSpring }}
-        className="fixed left-0 top-0 z-[110] h-[2px] w-full origin-left bg-gradient-to-r from-[var(--signal)] to-[var(--signal-2)]"
+        className="fixed left-0 top-0 z-[110] h-[2px] w-full origin-left bg-[var(--signal)]"
       />
 
       {/* Navigation */}
@@ -1688,29 +1677,26 @@ export default function Portfolio() {
           }`}
       >
         <div
-          className={`relative overflow-visible border border-[var(--glass-border-strong)] bg-[var(--glass)] backdrop-blur-3xl shadow-[var(--shadow-heavy)] transition-all duration-500 ${mobileNavOpen ? "rounded-[28px]" : "rounded-full"
+          className={`relative overflow-visible border border-[var(--glass-border-strong)] bg-[var(--glass)] backdrop-blur-3xl shadow-[var(--shadow-heavy)] transition-all duration-500 ${mobileNavOpen ? "rounded-[20px]" : "rounded-full"
             }`}
         >
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[var(--signal)]/5 via-transparent to-[var(--signal-2)]/5" />
-
           <div
             className={`relative flex items-center justify-between px-4 sm:px-6 transition-all duration-300 ${compact ? "h-12 sm:h-14" : "h-14 sm:h-16"
               }`}
           >
-            {/* Brand */}
             <a
               href="#home"
               className={`flex items-center gap-3 whitespace-nowrap rounded-full ${FOCUS_RING}`}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--signal)]/12 font-bold text-[var(--signal)]">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--signal)] font-mono text-[13px] font-semibold text-white">
                 {PROFILE.initials}
               </div>
               <div className="hidden min-[430px]:block">
-                <p className="text-sm font-semibold tracking-tight text-[var(--ink)] leading-none">
+                <p className="text-[15px] font-semibold tracking-tight text-[var(--ink)] leading-none">
                   {PROFILE.fullName}
                 </p>
-                <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]">
-                  Portfolio
+                <p className="mt-1 text-[13px] text-[var(--muted)]">
+                  Data scientist
                 </p>
               </div>
             </a>
@@ -1739,11 +1725,7 @@ export default function Portfolio() {
                           stiffness: 420,
                           damping: 32,
                         }}
-                        className="absolute inset-0 -z-10 rounded-full border border-[var(--signal)]/40"
-                        style={{
-                          background: `linear-gradient(90deg, var(--signal-wash), transparent)`,
-                          boxShadow: `0 0 0 1px var(--signal-wash), 0 4px 16px -4px var(--signal)`,
-                        }}
+                        className="absolute inset-0 -z-10 rounded-full bg-[var(--signal-wash)]"
                       />
                     )}
                     {item.label}
@@ -1834,13 +1816,15 @@ export default function Portfolio() {
       <Hero loaded={loaded} reduced={reduced} />
 
       {/* About */}
-      <section id="about" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-24 sm:px-6 md:py-36 lg:px-8">
-        <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-bold tracking-tight text-[var(--ink)]">
-          {ABOUT.headingStart} <span className="font-light text-[var(--muted)]">{ABOUT.headingEnd}</span>
-        </h2>
-        <div data-reveal className="mt-14 grid gap-6 md:grid-cols-2">
-          <div className="rounded-[2.5rem] border border-[var(--glass-border)] bg-[var(--glass)] p-8 md:p-10 shadow-[var(--shadow)] backdrop-blur-2xl">
-            <p className="text-xl leading-relaxed sm:text-2xl md:text-3xl font-medium text-[var(--ink)]">
+      <section id="about" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-24 sm:px-6 md:py-32 lg:px-8">
+        <div className="max-w-3xl border-l-2 border-[var(--signal)] pl-5">
+          <h2 data-reveal className="text-balance text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ink)]">
+            {ABOUT.heading}
+          </h2>
+        </div>
+        <div data-reveal className="mt-12 grid gap-5 md:grid-cols-2">
+          <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass)] p-8 shadow-[var(--shadow)]">
+            <p className="max-w-[62ch] text-[19px] leading-relaxed text-[var(--ink)]">
               {ABOUT.description}
             </p>
           </div>
@@ -1848,17 +1832,17 @@ export default function Portfolio() {
             {ABOUT.sections.map((section) => (
               <div
                 key={section.title}
-                className="group rounded-[2.5rem] border border-[var(--glass-border)] bg-[var(--glass)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--signal)] shadow-[var(--shadow)] backdrop-blur-2xl"
+                className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass)] p-6 shadow-[var(--shadow)]"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-[var(--ink)]">{section.title}</h3>
-                  <ArrowUpRight size={18} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 text-[var(--muted)]" />
+                  <h3 className="text-[17px] font-semibold text-[var(--ink)]">{section.title}</h3>
+                  <ArrowUpRight size={16} className="text-[var(--muted)]" />
                 </div>
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-1.5">
                   {section.items.map((item) => (
                     <span
                       key={item}
-                      className="rounded-full border border-[var(--glass-border)] px-3.5 py-1.5 text-xs text-[var(--muted)] transition hover:border-[var(--ink)]/30 hover:text-[var(--ink)]"
+                      className="rounded-md border border-[var(--glass-border)] bg-[var(--paper-2)] px-2.5 py-1 font-mono text-xs text-[var(--muted)]"
                     >
                       {item}
                     </span>
@@ -1870,43 +1854,104 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Expertise */}
-      <section id="expertise" className="border-y border-[var(--glass-border)] px-6 py-20 md:py-36 text-center">
-        <h2 data-reveal className="text-[clamp(2rem,5.5vw,4.5rem)] font-bold tracking-tight text-[var(--ink)]">
-          {EXPERTISE.heading}
-        </h2>
-        <div data-reveal>
-          <SkillsConstellation />
+      <section id="background" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6 md:py-24 lg:px-8">
+        <div className="flex flex-col gap-4 border-t border-[var(--line)] pt-10 md:flex-row md:items-end md:justify-between">
+          <h2 data-reveal className="max-w-xl text-balance text-[clamp(1.8rem,4vw,3rem)] font-semibold tracking-tight text-[var(--ink)]">
+            Background and focus
+          </h2>
+          <p data-reveal className="max-w-md text-[15px] leading-relaxed text-[var(--muted)]">
+            Education plus self-directed builds. Work you can open on GitHub.
+          </p>
+        </div>
+        <div data-reveal className="mt-10 grid gap-4 md:grid-cols-3">
+          {EXPERIENCE.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] p-6 shadow-[var(--shadow)]"
+            >
+              <p className="font-mono text-[13px] tabular-nums text-[var(--signal)]">
+                {item.period}
+              </p>
+              <h3 className="mt-3 text-[17px] font-semibold leading-snug text-[var(--ink)]">
+                {item.title}
+              </h3>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                {item.org}
+              </p>
+              <p className="mt-4 max-w-[62ch] text-[15px] leading-relaxed text-[var(--muted)]">
+                {item.detail}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Projects */}
-      <ProjectsSection projects={PROJECTS} onOpenProject={setModalIndex} />
+      <section id="expertise" className="border-y border-[var(--line)] bg-[var(--paper-2)] px-6 py-20 md:py-24">
+        <div className="mx-auto max-w-5xl">
+          <h2 data-reveal className="max-w-2xl text-balance text-[clamp(1.9rem,5vw,3.4rem)] font-semibold tracking-tight text-[var(--ink)]">
+            {EXPERTISE.heading}
+          </h2>
+          <p data-reveal className="mt-4 max-w-xl text-[15px] leading-relaxed text-[var(--muted)]">
+            {EXPERTISE.subheading}
+          </p>
+          <div data-reveal>
+            <SkillsConstellation />
+          </div>
+        </div>
+      </section>
 
-      {/* Contact */}
-      <section id="contact" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-24 sm:px-6 md:py-36 lg:px-8">
-        <h2 data-reveal className="text-[clamp(2.25rem,7vw,6rem)] font-bold tracking-tight text-[var(--ink)]">
-          {CONTACT_SECTION.headingStart}{" "}
-          <span className="font-light text-[var(--muted)]">{CONTACT_SECTION.headingEnd}</span>
+      <ProjectsSection
+        projects={PROJECTS}
+        sectionHeading={PROJECTS_SECTION.heading}
+        onOpenProject={setModalIndex}
+      />
+
+      <section id="contact" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-24 sm:px-6 md:py-32 lg:px-8">
+        <h2 data-reveal className="max-w-3xl text-balance text-[clamp(2rem,6vw,4.5rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ink)]">
+          {CONTACT_SECTION.heading}
         </h2>
-        <div data-reveal className="mt-14">
+        <p data-reveal className="mt-5 max-w-xl text-base leading-relaxed text-[var(--muted)]">
+          {CONTACT_SECTION.description}
+        </p>
+        <div data-reveal className="mt-8 flex flex-wrap items-center gap-3">
+          <ShineButton href={`mailto:${PROFILE.email}`} variant="solid" dataCursor={UI.cursorContactLabel}>
+            <Mail size={16} aria-hidden="true" /> {PROFILE.email}
+          </ShineButton>
+          <ShineButton href={PROFILE.resume} variant="ghost" dataCursor={UI.cursorViewLabel}>
+            <Download size={16} aria-hidden="true" /> Resume
+          </ShineButton>
+        </div>
+        <div data-reveal className="mt-10">
           <TerminalContact onToggleTheme={toggleTheme} />
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-[var(--glass-border)] p-6 sm:p-10 bg-[var(--paper-2)]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <b className="text-xl font-bold text-[var(--ink)]">{FOOTER.name}</b>
-            <p className="text-sm text-[var(--muted)]">{FOOTER.role}</p>
+      <footer className="border-t border-[var(--line)] bg-[var(--paper-2)] p-6 sm:p-10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-start md:justify-between">
+          <div className="max-w-xs">
+            <b className="text-lg font-semibold text-[var(--ink)]">{FOOTER.name}</b>
+            <p className="mt-1 text-sm text-[var(--muted)]">{FOOTER.role}</p>
+            <p className="mt-3 text-[13px] text-[var(--muted)]">
+              {FOOTER.tagline}
+            </p>
           </div>
-          <div className="flex gap-3">
+          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            {NAVIGATION_ITEMS.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2">
             <a
               href={SOCIALS.github}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="GitHub"
+              aria-label="GitHub profile"
               className={`rounded-full border border-[var(--glass-border)] p-3 text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
             >
               <Github size={16} aria-hidden="true" />
@@ -1915,14 +1960,14 @@ export default function Portfolio() {
               href={SOCIALS.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="LinkedIn"
+              aria-label="LinkedIn profile"
               className={`rounded-full border border-[var(--glass-border)] p-3 text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
             >
               <Linkedin size={16} aria-hidden="true" />
             </a>
             <a
               href={`mailto:${SOCIALS.email}`}
-              aria-label="Email"
+              aria-label={`Email ${SOCIALS.email}`}
               className={`rounded-full border border-[var(--glass-border)] p-3 text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
             >
               <Mail size={16} aria-hidden="true" />
@@ -1930,14 +1975,25 @@ export default function Portfolio() {
           </div>
           <div className="text-left md:text-right">
             <p className="text-xs text-[var(--muted)]">{FOOTER.location}</p>
-            <p className="font-mono text-xs text-[var(--muted)]">
-              {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "--:--"}
+            <p className="mt-1 font-mono text-xs tabular-nums text-[var(--muted)]">
+              Local time {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "--:--"}
             </p>
+            <a
+              href="#home"
+              className={`mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] ${FOCUS_RING}`}
+            >
+              Back to top <ArrowDown size={12} aria-hidden="true" className="rotate-180" />
+            </a>
           </div>
         </div>
-        <p className="mx-auto mt-8 max-w-7xl font-mono text-[10px] uppercase tracking-widest text-[var(--muted-2)]">
-          {FOOTER.tagline}
-        </p>
+        <div className="mx-auto mt-8 flex max-w-7xl flex-col gap-1 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[13px] text-[var(--muted)]">
+            © {new Date().getFullYear()} {FOOTER.name}. All rights reserved.
+          </p>
+          <p className="text-[13px] text-[var(--muted)]">
+            {PROFILE.university}, {PROFILE.city}
+          </p>
+        </div>
       </footer>
 
       {/* Modal */}
