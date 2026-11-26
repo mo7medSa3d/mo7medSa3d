@@ -1,54 +1,46 @@
 "use client";
 
 import Image from "next/image";
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  type Variants,
-} from "framer-motion";
-import React, { useCallback, useEffect, useMemo, useRef, useState, FC } from "react";
 import dynamic from "next/dynamic";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Activity,
   ArrowDown,
   ArrowUpRight,
+  Check,
   CheckCircle2,
-  Code2,
-  Cpu,
+  Copy,
   Download,
-  ExternalLink,
   Github,
+  GraduationCap,
+  Layers,
   Linkedin,
   Mail,
   Menu,
   Moon,
+  Sparkles,
   Sun,
   Terminal,
-  TrendingUp,
   X,
 } from "lucide-react";
 import {
-  PROFILE,
-  PROJECTS,
-  PROJECTS_SECTION,
-  SKILLS,
+  ABOUT,
+  CONTACT_SECTION,
+  EXPERTISE,
+  FOOTER,
   HERO,
   NAVIGATION_ITEMS,
-  ABOUT,
-  EXPERTISE,
-  EXPERIENCE,
-  CONTACT_SECTION,
-  FOOTER,
+  PROFILE,
+  PROJECT_CATEGORIES,
+  PROJECTS,
+  PROJECTS_SECTION,
+  SKILL_GROUPS,
+  SKILLS,
   TERMINAL,
-  SKILL_CATEGORIES,
-  LOADER,
+  TERMINAL_COMMANDS,
   UI,
-  SOCIALS,
+  type ProjectCategory,
+  type ProjectItem,
 } from "@/constants/data";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -57,316 +49,131 @@ const AICore = dynamic(() => import("@/three/AICore"), {
   loading: () => (
     <div
       aria-hidden="true"
-      className="h-full w-full animate-pulse rounded-[3rem] bg-white/[.03]"
-    />
+      className="flex h-full w-full items-center justify-center"
+    >
+      <div className="h-[64%] w-[64%] rounded-full border border-[var(--signal)]/20 bg-[radial-gradient(circle,var(--signal-wash)_0%,transparent_70%)]" />
+    </div>
   ),
 });
 
-/* -------------------------------------------------------------------------- */
-/*  Semantic Theme Tokens                                                     */
-/* -------------------------------------------------------------------------- */
-type ThemeVars = Record<
-  | "--paper"
-  | "--paper-2"
-  | "--ink"
-  | "--muted"
-  | "--muted-2"
-  | "--line"
-  | "--glass"
-  | "--glass-border"
-  | "--glass-border-strong"
-  | "--card"
-  | "--card-border"
-  | "--signal"
-  | "--signal-2"
-  | "--signal-wash"
-  | "--focus"
-  | "--success"
-  | "--warning"
-  | "--error"
-  | "--aurora-1"
-  | "--aurora-2"
-  | "--shadow"
-  | "--shadow-heavy",
-  string
->;
-
-const CORE_AMBER = "#C19A4B";
-const CORE_TEAL = "#6BA99E";
-
-const DARK_THEME: ThemeVars = {
-  "--paper": "#0A0D0C",
-  "--paper-2": "#141918",
-  "--ink": "#EDE9DE",
-  "--muted": "#A8A699",
-  "--muted-2": "#8B897D",
-  "--glass": "rgba(20, 25, 24, 0.78)",
-  "--glass-border": "rgba(237, 233, 222, 0.12)",
-  "--glass-border-strong": "rgba(193, 154, 75, 0.38)",
-  "--card": "#121614",
-  "--card-border": "rgba(237, 233, 222, 0.10)",
-  "--line": "rgba(237, 233, 222, 0.09)",
-  "--signal": "#C19A4B",
-  "--signal-2": "#6BA99E",
-  "--signal-wash": "rgba(193, 154, 75, 0.14)",
-  "--focus": "#D8B96A",
-  "--success": "#6BA99E",
-  "--warning": "#C19A4B",
-  "--error": "#C96F4A",
-  "--aurora-1": "rgba(193, 154, 75, 0.10)",
-  "--aurora-2": "rgba(107, 169, 158, 0.08)",
-  "--shadow": "0 1px 0 rgba(0,0,0,0.4), 0 16px 40px -16px rgba(0,0,0,0.7)",
-  "--shadow-heavy": "0 2px 0 rgba(0,0,0,0.4), 0 32px 64px -20px rgba(0,0,0,0.8)",
-};
-
-/* ----------------------------------------------------------------------- *
- *  Light theme — rebuilt from scratch, not a dark-mode inversion.
- *
- *  The old light theme failed because every surface (page, glass, cards)
- *  sat within a few percent of the same near-white value, so nothing had
- *  an edge. Apple, Linear, Vercel and Stripe all solve this the same way:
- *  the *page* is a warm-neutral gray, elevated surfaces are true white,
- *  and hierarchy comes from that gap plus a real (not decorative) shadow —
- *  never from a heavier border alone. Borders stay hairline-thin but are
- *  paired with shadow + a whiter surface, so they read as "precise" rather
- *  than "invisible."
- * ----------------------------------------------------------------------- */
-const LIGHT_THEME: ThemeVars = {
-  "--paper": "#F5F3EC",
-  "--paper-2": "#FFFFFF",
-  "--ink": "#161915",
-  "--muted": "#4E4E46",
-  "--muted-2": "#6E6C60",
-  "--glass": "rgba(255, 255, 255, 0.88)",
-  "--glass-border": "rgba(22, 25, 21, 0.12)",
-  "--glass-border-strong": "rgba(138, 100, 32, 0.32)",
-  "--card": "#FFFFFF",
-  "--card-border": "rgba(22, 25, 21, 0.09)",
-  "--line": "rgba(22, 25, 21, 0.10)",
-  "--signal": "#8A6420",
-  "--signal-2": "#2F6F62",
-  "--signal-wash": "rgba(138, 100, 32, 0.10)",
-  "--focus": "#8A6420",
-  "--success": "#2F6F62",
-  "--warning": "#8A6420",
-  "--error": "#A34A2A",
-  "--aurora-1": "rgba(138, 100, 32, 0.08)",
-  "--aurora-2": "rgba(47, 111, 98, 0.06)",
-  "--shadow": "0 1px 0 rgba(22,25,21,0.05), 0 12px 28px -14px rgba(22,25,21,0.22)",
-  "--shadow-heavy": "0 1px 0 rgba(22,25,21,0.06), 0 28px 56px -20px rgba(22,25,21,0.28)",
-};
-
-/* -------------------------------------------------------------------------- */
-/*  Focus Ring — applied to every interactive element so keyboard users get   */
-/*  the same crisp affordance mouse users get from hover states.              */
-/* -------------------------------------------------------------------------- */
 const FOCUS_RING =
   "outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--paper)]";
 
-/* -------------------------------------------------------------------------- */
-/*  Branded Technology Chips System                                           */
-/* -------------------------------------------------------------------------- */
-interface TechBrandConfig {
-  color: string;
-  border: string;
-  bg: string;
+const TECH_COLORS: Record<string, string> = {
+  Python: "#F59E0B",
+  "Machine Learning": "#38BDF8",
+  "Deep Learning": "#A855F7",
+  "Scikit-Learn": "#F97316",
+  TensorFlow: "#FF6F00",
+  Keras: "#EF4444",
+  XGBoost: "#22C55E",
+  Pandas: "#818CF8",
+  NumPy: "#38BDF8",
+  SQL: "#06B6D4",
+  "Power BI": "#EAB308",
+  DAX: "#F59E0B",
+  "Power Query": "#10B981",
+  "Data Modeling": "#14B8A6",
+  Tableau: "#60A5FA",
+  Excel: "#22C55E",
+  Playwright: "#34D399",
+  Selenium: "#4ADE80",
+  "Web Scraping": "#A78BFA",
+  Automation: "#A78BFA",
+  FastAPI: "#14B8A6",
+  Flask: "#94A3B8",
+  Docker: "#38BDF8",
+};
+
+function getTechColor(name: string) {
+  return TECH_COLORS[name] ?? "#94A3B8";
 }
 
-/* Tech chips stay quiet ledger labels. Color is reserved for data and
-   the single brass accent, so stack names render in mono on paper. */
-
-function getTechBrand(_techName: string): TechBrandConfig {
-  return {
-    color: "var(--muted)",
-    border: "var(--glass-border)",
-    bg: "var(--paper-2)",
-  };
+function TechChip({ name }: { name: string }) {
+  const color = getTechColor(name);
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--glass-border)] bg-[var(--paper)]/70 px-3 py-1 text-xs font-medium text-[var(--ink)]">
+      <span
+        aria-hidden="true"
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      {name}
+    </span>
+  );
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Utility Hooks                                                             */
+/*  Isolated Footer Clock (avoids re-rendering the entire page every second)  */
 /* -------------------------------------------------------------------------- */
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+function LocalClock() {
+  const [time, setTime] = useState("--:--");
+
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mediaQuery.matches);
-    const handleChange = (event: MediaQueryListEvent) => setReduced(event.matches);
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    const update = () =>
+      setTime(
+        new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      );
+    update();
+    const id = setInterval(update, 30_000);
+    return () => clearInterval(id);
   }, []);
-  return reduced;
-}
 
-function useRafThrottledScroll(callback: () => void, deps: React.DependencyList) {
-  useEffect(() => {
-    let frame: number | null = null;
-    const onScroll = () => {
-      if (frame !== null) return;
-      frame = requestAnimationFrame(() => {
-        callback();
-        frame = null;
-      });
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame !== null) cancelAnimationFrame(frame);
-    };
-  }, deps);
+  return <p className="font-mono text-xs tabular-nums text-[var(--muted)]">{time}</p>;
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Magnetic Button Container                                                 */
+/*  Ambient Background (lightweight CSS gradients — zero SVG turbulence)      */
 /* -------------------------------------------------------------------------- */
-interface MagneticProps {
-  children: React.ReactNode;
-  strength?: number;
-}
-
-function Magnetic({ children, strength = 0.35 }: MagneticProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 250, damping: 18, mass: 0.4 });
-  const springY = useSpring(y, { stiffness: 250, damping: 18, mass: 0.4 });
-
-  const handlePointerMove = useCallback(
-    (event: React.MouseEvent) => {
-      const rect = ref.current?.getBoundingClientRect();
-      if (!rect) return;
-      x.set((event.clientX - rect.left - rect.width / 2) * strength);
-      y.set((event.clientY - rect.top - rect.height / 2) * strength);
-    },
-    [strength, x, y]
-  );
-
-  const handlePointerLeave = useCallback(() => {
-    x.set(0);
-    y.set(0);
-  }, [x, y]);
-
+function Background() {
   return (
-    <motion.div
-      ref={ref}
-      style={{ x: springX, y: springY }}
-      onMouseMove={handlePointerMove}
-      onMouseLeave={handlePointerLeave}
-      className="inline-flex"
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Ambient Background                                                        */
-/* -------------------------------------------------------------------------- */
-function Background({ reduced }: { reduced: boolean }) {
-  const auroraClass = reduced ? "" : "animate-[aurora_16s_ease-in-out_infinite]";
-  const auroraReverseClass = reduced ? "" : "animate-[aurora_20s_ease-in-out_infinite_reverse]";
-
-  return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
-      <div className="absolute inset-0 bg-[var(--paper)] transition-colors duration-500" />
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div className="absolute inset-0 bg-[var(--paper)]" />
       <div
-        className={`absolute -top-1/3 left-1/2 h-[70vh] w-[70vw] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,var(--aurora-1)_0%,transparent_65%)] opacity-60 blur-3xl ${auroraClass}`}
-      />
-      <div
-        className={`absolute -bottom-1/3 right-0 h-[60vh] w-[60vw] rounded-full bg-[radial-gradient(circle,var(--aurora-2)_0%,transparent_65%)] opacity-40 blur-3xl ${auroraReverseClass}`}
-      />
-      <div
-        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+        className="animate-orb absolute -top-40 left-1/2 h-[65vh] w-[70vw] -translate-x-1/2 rounded-full opacity-75 blur-3xl"
         style={{
-          backgroundImage: `linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px)`,
-          backgroundSize: "64px 64px",
+          background:
+            "radial-gradient(circle, var(--aurora-1) 0%, transparent 68%)",
         }}
       />
-      <svg className="absolute inset-0 h-full w-full opacity-[0.025] mix-blend-overlay">
-        <filter id="grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves={3} stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#grain)" />
-      </svg>
+      <div
+        className="animate-orb-slow absolute -bottom-40 right-0 h-[55vh] w-[55vw] rounded-full opacity-60 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, var(--aurora-2) 0%, transparent 68%)",
+        }}
+      />
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Custom Animated Cursor                                                    */
-/* -------------------------------------------------------------------------- */
-function Cursor() {
-  const mx = useMotionValue(-100);
-  const my = useMotionValue(-100);
-  const x = useSpring(mx, { stiffness: 700, damping: 42 });
-  const y = useSpring(my, { stiffness: 700, damping: 42 });
-  const rx = useSpring(mx, { stiffness: 210, damping: 25 });
-  const ry = useSpring(my, { stiffness: 210, damping: 25 });
-  const [label, setLabel] = useState("");
-
-  useEffect(() => {
-    const m = (e: MouseEvent) => {
-      mx.set(e.clientX);
-      my.set(e.clientY);
-    };
-    const h = (e: MouseEvent) => {
-      const t = (e.target as HTMLElement).closest<HTMLElement>("[data-cursor],a,button");
-      setLabel(t?.dataset.cursor || (t ? UI.cursorViewLabel : ""));
-    };
-    window.addEventListener("mousemove", m);
-    document.addEventListener("mouseover", h);
-    return () => {
-      window.removeEventListener("mousemove", m);
-      document.removeEventListener("mouseover", h);
-    };
-  }, [mx, my]);
-
-  return (
-    <>
-      <motion.div
-        style={{ x, y }}
-        className="pointer-events-none fixed left-0 top-0 z-[150] hidden h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--ink)] mix-blend-difference md:block"
-      />
-      <motion.div
-        style={{ x: rx, y: ry }}
-        animate={{ width: label ? 72 : 34, height: label ? 72 : 34 }}
-        className="pointer-events-none fixed left-0 top-0 z-[149] hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--signal)]/50 bg-[var(--signal)]/10 text-[9px] font-bold tracking-widest text-[var(--ink)] backdrop-blur-md md:flex"
-      >
-        {label}
-      </motion.div>
-    </>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Roles Carousel                                                            */
+/*  Roles Rotator                                                             */
 /* -------------------------------------------------------------------------- */
 function Roles() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const id = setInterval(
-      () => setIndex((current) => (current + 1) % PROFILE.roles.length),
-      UI.roleRotateMs
+      () => setIndex((i) => (i + 1) % PROFILE.roles.length),
+      UI.roleRotateMs,
     );
     return () => clearInterval(id);
   }, []);
 
   return (
-    <div className="h-10 overflow-hidden sm:h-12">
+    <div className="h-9 overflow-hidden sm:h-11">
       <AnimatePresence mode="wait">
         <motion.div
           key={index}
-          initial={{ opacity: 0, y: -20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{
-            type: "spring",
-            stiffness: 260,
-            damping: 22,
-          }}
-          className="text-2xl font-semibold text-[var(--ink)] sm:text-3xl"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -14 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="text-xl font-semibold text-[var(--signal)] sm:text-2xl"
         >
           {PROFILE.roles[index]}
         </motion.div>
@@ -376,590 +183,538 @@ function Roles() {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Shine Magnetic Button Component                                          */
+/*  Hero Visual Stage                                                         */
 /* -------------------------------------------------------------------------- */
-interface ShineButtonProps {
-  href: string;
-  variant: "solid" | "ghost";
-  dataCursor?: string;
-  children: React.ReactNode;
-}
-
-function ShineButton({ href, variant, dataCursor, children }: ShineButtonProps) {
-  const ref = useRef<HTMLAnchorElement>(null);
-
-  const handleMove = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
-    const rect = ref.current?.getBoundingClientRect();
-    if (!rect) return;
-    const px = ((event.clientX - rect.left) / rect.width) * 100;
-    const py = ((event.clientY - rect.top) / rect.height) * 100;
-    ref.current?.style.setProperty("--shine-x", `${px}%`);
-    ref.current?.style.setProperty("--shine-y", `${py}%`);
-  }, []);
-
-  const base =
-    `group relative isolate flex items-center gap-2 overflow-hidden rounded-full px-6 py-3.5 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 ${FOCUS_RING}`;
-  const solid =
-    "bg-[var(--ink)] text-[var(--paper)] shadow-[var(--shadow)] hover:shadow-[var(--shadow-heavy)]";
-  const ghost =
-    "border border-[var(--glass-border)] text-[var(--ink)] hover:border-[var(--ink)]/40 bg-[var(--glass)] backdrop-blur-xl";
-
+function HeroVisual() {
   return (
-    <Magnetic strength={0.25}>
-      <a
-        ref={ref}
-        href={href}
-        onMouseMove={handleMove}
-        data-cursor={dataCursor}
-        className={`${base} ${variant === "solid" ? solid : ghost}`}
-        style={{ "--shine-x": "50%", "--shine-y": "50%" } as React.CSSProperties}
-      >
-        <span
+    <div className="relative mx-auto h-[360px] w-full max-w-[380px] sm:h-[460px] sm:max-w-[460px] lg:h-[580px] lg:max-w-[580px]">
+      <div className="absolute -inset-6 sm:-inset-10">
+        <AICore />
+      </div>
+
+      {/* Portrait centerpiece */}
+      <div className="absolute left-1/2 top-1/2 z-10 h-[50%] w-[50%] max-h-[268px] max-w-[268px] -translate-x-1/2 -translate-y-1/2">
+        <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${variant === "solid"
-            ? "bg-[radial-gradient(circle_at_var(--shine-x)_var(--shine-y),rgba(255,255,255,0.25),transparent_60%)]"
-            : "bg-[radial-gradient(circle_at_var(--shine-x)_var(--shine-y),var(--line),transparent_60%)]"
-            }`}
+          className="absolute -inset-3 rounded-full opacity-45 blur-2xl"
+          style={{
+            background:
+              "radial-gradient(circle, var(--signal) 0%, var(--signal-2) 60%, transparent 75%)",
+          }}
         />
-        <span className="relative z-10 flex items-center gap-2">{children}</span>
-      </a>
-    </Magnetic>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Metric Chip & System Tag                                                  */
-/* -------------------------------------------------------------------------- */
-function MetricChip({ metric, label, className = "" }: { metric: string; label: string; className?: string }) {
-  return (
-    <div
-      className={`pointer-events-none flex flex-col rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] px-5 py-4 backdrop-blur-2xl shadow-[var(--shadow)] ${className}`}
-    >
-      <span className="font-mono text-xl font-semibold leading-none tabular-nums text-[var(--ink)]">{metric}</span>
-      <span className="mt-1.5 text-[13px] text-[var(--muted)]">
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function SystemTag({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`pointer-events-none flex items-center gap-2.5 rounded-full border border-[var(--glass-border)] bg-[var(--glass)] px-5 py-2.5 backdrop-blur-xl shadow-[var(--shadow)] ${className}`}
-    >
-      <span className="relative flex h-2 w-2">
-        <span
-          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
-          style={{ backgroundColor: CORE_AMBER }}
-        />
-        <span
-          className="relative inline-flex h-2 w-2 rounded-full"
-          style={{ backgroundColor: CORE_AMBER }}
-        />
-      </span>
-      <Activity size={14} style={{ color: CORE_TEAL }} aria-hidden="true" />
-      <span className="text-[13px] text-[var(--muted)]">
-        {UI.signalCoreLive}
-      </span>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Visual Composition (Hero Graphic)                                         */
-/* -------------------------------------------------------------------------- */
-function VisualComposition({ reduced }: { reduced: boolean }) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const rx = useMotionValue(0);
-  const ry = useMotionValue(0);
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const srx = useSpring(rx, { stiffness: 120, damping: 20 });
-  const sry = useSpring(ry, { stiffness: 120, damping: 20 });
-  const spx = useSpring(px, { stiffness: 90, damping: 18 });
-  const spy = useSpring(py, { stiffness: 90, damping: 18 });
-
-  const portraitX = useTransform(spx, (v) => v * -14);
-  const portraitY = useTransform(spy, (v) => v * -14);
-  const chipAX = useTransform(spx, (v) => v * -30);
-  const chipAY = useTransform(spy, (v) => v * -30);
-
-  const handleMove = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (reduced) return;
-      const rect = wrapRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const relX = (event.clientX - rect.left) / rect.width - 0.5;
-      const relY = (event.clientY - rect.top) / rect.height - 0.5;
-      rx.set(-relY * 6);
-      ry.set(relX * 6);
-      px.set(relX);
-      py.set(relY);
-    },
-    [reduced, rx, ry, px, py]
-  );
-
-  const handleLeave = useCallback(() => {
-    rx.set(0);
-    ry.set(0);
-    px.set(0);
-    py.set(0);
-  }, [rx, ry, px, py]);
-
-  return (
-    <div
-      ref={wrapRef}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-      className="relative mx-auto h-[420px] w-full max-w-[420px] sm:h-[520px] sm:max-w-[520px] md:h-[680px] md:max-w-none lg:h-[800px]"
-    >
-      <motion.div
-        aria-hidden="true"
-        animate={reduced ? {} : { opacity: [0.35, 0.55, 0.35], scale: [1, 1.08, 1] }}
-        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-        className="absolute left-1/2 top-1/2 h-[70%] w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[110px]"
-        style={{
-          background: `radial-gradient(circle, ${CORE_AMBER}26 0%, transparent 70%)`,
-        }}
-      />
-      <motion.div
-        aria-hidden="true"
-        animate={reduced ? {} : { opacity: [0.22, 0.4, 0.22] }}
-        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
-        className="absolute left-[62%] top-[42%] h-[55%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
-        style={{
-          background: `radial-gradient(circle, ${CORE_TEAL}22 0%, transparent 70%)`,
-        }}
-      />
-      <motion.div
-        style={{ rotateX: srx, rotateY: sry, transformPerspective: 1200 }}
-        className="relative h-full w-full will-change-transform"
-      >
-        <div className="absolute inset-0 -m-6 sm:-m-10 md:-m-16 lg:-m-24">
-          <AICore />
-        </div>
-        <motion.div
-          animate={reduced ? {} : { y: [0, -10, 0] }}
-          transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-          className="absolute left-1/2 top-1/2 z-10 h-[42%] w-[42%] max-h-[300px] max-w-[300px] -translate-x-1/2 -translate-y-1/2"
+        <div
+          className="relative h-full w-full overflow-hidden rounded-full p-[2.5px] shadow-[var(--shadow-heavy)]"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--paper), var(--paper)), linear-gradient(135deg, var(--signal), var(--signal-2))",
+            backgroundOrigin: "border-box",
+            backgroundClip: "content-box, border-box",
+          }}
         >
-          <motion.div style={{ x: portraitX, y: portraitY }} className="relative h-full w-full">
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full blur-2xl opacity-40"
-              style={{
-                background: `radial-gradient(circle, ${CORE_AMBER}44 0%, transparent 70%)`,
-              }}
-            />
-            <div
-              className="relative h-full w-full overflow-hidden rounded-full p-[3px]"
-              style={{
-                backgroundImage: `linear-gradient(var(--paper), var(--paper)), linear-gradient(135deg, ${CORE_AMBER}, ${CORE_TEAL})`,
-                backgroundOrigin: "border-box",
-                backgroundClip: "content-box, border-box",
-              }}
-            >
-              <Image
-                src="/images/profile.webp"
-                alt={PROFILE.fullName}
-                width={600}
-                height={734}
-                priority
-                quality={100}
-                sizes="(min-width: 1024px) 300px, (min-width: 640px) 260px, 200px"
-                className="h-full w-full rounded-full object-cover"
-                style={{ objectPosition: "center top" }}
-              />
-            </div>
-          </motion.div>
-        </motion.div>
-        <motion.div
-          style={{ x: chipAX, y: chipAY }}
-          className="absolute left-[15%] top-[20%] hidden sm:block md:-left-8 lg:-left-12"
-        >
-          <MetricChip metric="Data Science" label="Python & ML" />
-        </motion.div>
-        <SystemTag className="absolute bottom-4 left-1/2 -translate-x-1/2 sm:bottom-8" />
-      </motion.div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Hero Section                                                              */
-/* -------------------------------------------------------------------------- */
-function Hero({ loaded, reduced }: { loaded: boolean; reduced: boolean }) {
-  const container: Variants = reduced
-    ? { hidden: {}, show: { transition: { staggerChildren: 0.05 } } }
-    : {
-      hidden: {},
-      show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
-    };
-
-  const item: Variants = reduced
-    ? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.4 } } }
-    : {
-      hidden: { opacity: 0, y: 26, filter: "blur(8px)" },
-      show: {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
-      },
-    };
-
-  return (
-    <section
-      id="home"
-      className="relative isolate flex min-h-screen flex-col justify-center gap-14 px-6 pb-20 pt-32 md:gap-10 md:px-12 md:pb-0 md:pt-28"
-    >
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate={loaded ? "show" : "hidden"}
-        className="relative z-10 grid items-center gap-14 md:grid-cols-12 md:gap-6"
-      >
-        <div className="relative min-w-0 md:col-span-5">
-          <motion.span
-            variants={item}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--glass-border)] bg-[var(--glass)] px-4 py-2 text-xs backdrop-blur-xl"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--signal)] opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[var(--signal)]" />
-            </span>
-            {HERO.badgeText}
-          </motion.span>
-
-          <motion.h1
-            variants={item}
-            className="mt-8 text-balance text-[clamp(2.75rem,8.5vw,6.5rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[var(--ink)]"
-          >
-            {HERO.headingLine1} {HERO.headingLine2}
-          </motion.h1>
-
-          <motion.div variants={item} className="mt-6 border-l-2 border-[var(--signal)] pl-4">
-            <p className="text-sm text-[var(--muted)]">
-              {HERO.subHeading}
-            </p>
-            <div className="mt-1">
-              <Roles />
-            </div>
-          </motion.div>
-
-          <motion.p variants={item} className="mt-3 max-w-md leading-relaxed text-[var(--muted)] sm:max-w-lg">
-            {PROFILE.bio}
-          </motion.p>
-
-          <motion.div variants={item} className="mt-10 flex flex-wrap items-center gap-3">
-            <ShineButton href="#projects" variant="solid" dataCursor={UI.cursorExploreLabel}>
-              {HERO.primaryButtonText} <ArrowDown size={16} aria-hidden="true" />
-            </ShineButton>
-            <ShineButton href="#contact" variant="ghost" dataCursor={UI.cursorContactLabel}>
-              {HERO.secondaryButtonText}
-            </ShineButton>
-            <Magnetic strength={0.25}>
-              <a
-                href={PROFILE.resume}
-                download
-                aria-label={HERO.resumeButtonLabel}
-                className={`flex items-center justify-center rounded-full border border-[var(--glass-border)] p-3.5 transition-colors hover:border-[var(--ink)]/40 bg-[var(--glass)] ${FOCUS_RING}`}
-              >
-                <Download size={18} aria-hidden="true" />
-              </a>
-            </Magnetic>
-          </motion.div>
-        </div>
-
-        <div className="relative min-w-0 md:col-span-7 md:-mr-6 lg:-mr-16 xl:-mr-24">
-          <motion.div variants={item}>
-            <VisualComposition reduced={reduced} />
-          </motion.div>
-        </div>
-      </motion.div>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Loading Screen                                                            */
-/* -------------------------------------------------------------------------- */
-function LoaderScreen({ onDone }: { onDone: () => void }) {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setProgress((current) => {
-        const next = Math.min(100, current + UI.loaderStep);
-        if (next === 100) {
-          clearInterval(id);
-          setTimeout(onDone, UI.loaderExitDelayMs);
-        }
-        return next;
-      });
-    }, UI.loaderTickMs);
-    return () => clearInterval(id);
-  }, [onDone]);
-
-  return (
-    <motion.div
-      role="status"
-      aria-live="polite"
-      aria-label={`Loading portfolio, ${progress}% complete`}
-      exit={{ opacity: 0, filter: "blur(15px)" }}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-[#0A0D0C]"
-    >
-      <div className="w-[min(600px,85vw)]">
-        <p className="font-mono text-sm text-[var(--signal)]">
-          {LOADER.tagline}
-        </p>
-        <h1 className="mt-8 text-5xl font-semibold tracking-tight text-[#EDE9DE]">
-          {LOADER.headingLine1} {LOADER.headingLine2}
-        </h1>
-        <div className="mt-12 h-[2px] w-full bg-white/10">
-          <div
-            className="h-full bg-[var(--signal)] transition-[width] duration-150"
-            style={{ width: `${progress}%` }}
+          <Image
+            src="/images/profile.webp"
+            alt={PROFILE.fullName}
+            width={536}
+            height={656}
+            priority
+            sizes="(min-width: 1024px) 268px, (min-width: 640px) 230px, 180px"
+            className="h-full w-full rounded-full object-cover object-top"
           />
         </div>
-        <p className="mt-3 text-right font-mono text-xs text-white/50">{progress}%</p>
       </div>
-    </motion.div>
+
+    </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Interactive Terminal Contact                                              */
+/*  Project Card (featured full-width or compact 2-col grid)                  */
+/* -------------------------------------------------------------------------- */
+function ProjectCard({
+  project,
+  index,
+  featured,
+  onOpen,
+}: {
+  project: ProjectItem;
+  index: number;
+  featured: boolean;
+  onOpen: () => void;
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className={`group relative flex flex-col overflow-hidden rounded-3xl border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--shadow)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--glass-border-strong)] hover:shadow-[var(--shadow-heavy)] ${
+        featured ? "lg:col-span-2 lg:grid lg:grid-cols-12" : ""
+      }`}
+    >
+      {/* Preview Frame */}
+      <div
+        className={`relative overflow-hidden bg-[var(--paper-2)] ${
+          featured ? "aspect-[16/10] lg:col-span-7 lg:aspect-auto lg:min-h-[380px]" : "aspect-[16/10]"
+        }`}
+      >
+        <Image
+          src={project.image}
+          alt={`${project.title} preview`}
+          fill
+          sizes={
+            featured
+              ? "(min-width: 1024px) 58vw, 100vw"
+              : "(min-width: 1024px) 46vw, 100vw"
+          }
+          className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
+        />
+        <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-3 py-1 backdrop-blur-md">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ backgroundColor: project.color }}
+          />
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
+            {PROJECTS_SECTION.caseStudyPrefix}
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        </div>
+        <div className="absolute bottom-4 left-4 rounded-full border border-white/15 bg-black/55 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/90 backdrop-blur-md">
+          {project.category}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div
+        className={`flex flex-1 flex-col justify-between p-6 sm:p-7 ${
+          featured ? "lg:col-span-5 lg:p-8" : ""
+        }`}
+      >
+        <div>
+          <h3 className="text-balance text-xl font-bold tracking-tight text-[var(--ink)] sm:text-2xl">
+            {project.title}
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)] sm:text-[15px]">
+            {project.summary}
+          </p>
+
+          <div className="mt-5 flex flex-wrap gap-1.5" aria-label="Technologies used">
+            {project.tech.map((t) => (
+              <TechChip key={t} name={t} />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-end justify-between gap-4 border-t border-[var(--line)] pt-5">
+          <div>
+            <div
+              className="text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl"
+              style={{ color: project.color }}
+            >
+              {project.metric}
+            </div>
+            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted-2)]">
+              {project.label}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`View ${project.title} on GitHub`}
+              className={`grid h-10 w-10 place-items-center rounded-full border border-[var(--glass-border)] bg-[var(--paper)] text-[var(--muted)] transition-colors hover:border-[var(--ink)]/40 hover:text-[var(--ink)] ${FOCUS_RING}`}
+            >
+              <Github size={16} aria-hidden="true" />
+            </a>
+            <button
+              type="button"
+              onClick={onOpen}
+              className={`inline-flex h-10 items-center gap-1.5 rounded-full bg-[var(--ink)] px-4 text-xs font-semibold text-[var(--paper)] transition-transform hover:-translate-y-0.5 ${FOCUS_RING}`}
+            >
+              <span>Case study</span>
+              <ArrowUpRight size={14} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Case Study Modal                                                          */
+/* -------------------------------------------------------------------------- */
+function ProjectModal({
+  project,
+  index,
+  onClose,
+}: {
+  project: ProjectItem;
+  index: number;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/65 backdrop-blur-md"
+      />
+
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-title"
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 16 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative z-10 flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-[var(--glass-border-strong)] bg-[var(--card)] text-[var(--ink)] shadow-[var(--shadow-heavy)]"
+      >
+        <div className="flex items-center justify-between border-b border-[var(--line)] px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <span
+              className="rounded-full border border-[var(--glass-border)] bg-[var(--paper)] px-2.5 py-0.5 font-mono text-[11px] font-semibold"
+              style={{ color: project.color }}
+            >
+              {PROJECTS_SECTION.caseStudyPrefix}
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="font-mono text-xs text-[var(--muted-2)]">
+              {project.category}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close case study"
+            className={`grid h-8 w-8 place-items-center rounded-full border border-[var(--glass-border)] bg-[var(--paper)] text-[var(--ink)] transition-colors hover:border-[var(--ink)]/40 ${FOCUS_RING}`}
+          >
+            <X size={15} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto p-6">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--paper-2)]">
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              sizes="(min-width: 768px) 720px, 100vw"
+              className="object-cover object-top"
+            />
+          </div>
+
+          <div>
+            <h2
+              id="project-modal-title"
+              className="text-2xl font-bold tracking-tight text-[var(--ink)] sm:text-3xl"
+            >
+              {project.title}
+            </h2>
+            <p className="mt-2.5 text-sm leading-relaxed text-[var(--muted)] sm:text-base">
+              {project.summary}
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-4">
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-4">
+              <div
+                className="text-2xl font-extrabold tabular-nums"
+                style={{ color: project.color }}
+              >
+                {project.metric}
+              </div>
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-2)]">
+                {project.label}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-4 sm:col-span-3">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-2)]">
+                Tech stack
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {project.tech.map((t) => (
+                  <TechChip key={t} name={t} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-[var(--muted-2)]">
+              <Sparkles size={13} style={{ color: project.color }} aria-hidden="true" />
+              Key highlights
+            </h3>
+            <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              {project.highlights.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-2.5 rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-3.5 text-xs leading-relaxed text-[var(--ink)]/90"
+                >
+                  <CheckCircle2
+                    size={15}
+                    className="mt-0.5 shrink-0"
+                    style={{ color: project.color }}
+                    aria-hidden="true"
+                  />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-[var(--line)] px-6 py-4">
+          <a
+            href={project.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-5 py-2.5 text-xs font-semibold text-[var(--paper)] transition-transform hover:-translate-y-0.5 ${FOCUS_RING}`}
+          >
+            <Github size={14} aria-hidden="true" />
+            <span>View repository</span>
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            className={`rounded-full border border-[var(--glass-border)] px-4 py-2 text-xs font-medium text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
+          >
+            Close
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Interactive Terminal (full command set, ↑/↓ history, Tab autocomplete)    */
 /* -------------------------------------------------------------------------- */
 type HistoryEntryType = "prompt" | "output" | "error";
+
 interface HistoryEntry {
+  id: number;
   type: HistoryEntryType;
-  text: React.ReactNode;
+  node: React.ReactNode;
 }
 
-const WELCOME_ENTRY: HistoryEntry = {
-  type: "output",
-  text: (
-    <div>
-      <div className="text-[var(--signal)] font-semibold">{TERMINAL.welcome[0]}</div>
-      <div className="text-white/70">{TERMINAL.welcome[1]}</div>
-    </div>
-  ),
-};
-
-const TERMINAL_COMMANDS = [
-  "help",
-  "whoami",
-  "skills",
-  "projects",
-  "email",
-  "github",
-  "linkedin",
-  "resume",
-  "theme",
-  "date",
-  "clear",
-] as const;
-
 function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
-  const [history, setHistory] = useState<HistoryEntry[]>([WELCOME_ENTRY]);
-  const [input, setInput] = useState("");
-  const [commandLog, setCommandLog] = useState<string[]>([]);
-  const [historyCursor, setHistoryCursor] = useState(-1);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const nextId = useRef(1);
   const logRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const el = logRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [history]);
-
-  const pushEntry = useCallback(
-    (command: string, type: HistoryEntryType, output: React.ReactNode) => {
-      setHistory((prev) => [
-        ...prev,
-        { type: "prompt", text: `$ ${command}` },
-        { type, text: output },
-      ]);
-      setCommandLog((prev) => [...prev, command]);
-      setHistoryCursor(-1);
-      setInput("");
+  const [history, setHistory] = useState<HistoryEntry[]>([
+    {
+      id: 0,
+      type: "output",
+      node: (
+        <div className="space-y-1">
+          <div className="font-semibold text-sky-400">{TERMINAL.welcome[0]}</div>
+          <div className="text-slate-400">{TERMINAL.welcome[1]}</div>
+        </div>
+      ),
     },
-    []
-  );
+  ]);
+  const [input, setInput] = useState("");
+  const [cmdHistory, setCmdHistory] = useState<string[]>([]);
+  const [cursor, setCursor] = useState(-1);
 
-  const handleCommand = useCallback(
-    (rawCommand: string) => {
-      const command = rawCommand.trim().toLowerCase();
-      if (command === "") return;
+  const scrollLogToBottom = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (logRef.current) {
+        logRef.current.scrollTop = logRef.current.scrollHeight;
+      }
+    });
+  }, []);
 
-      if (command === "clear") {
+  const runCommand = useCallback(
+    (raw: string) => {
+      const trimmed = raw.trim();
+      if (!trimmed) return;
+      const cmd = trimmed.toLowerCase();
+
+      setCmdHistory((prev) => [...prev, trimmed]);
+      setCursor(-1);
+      setInput("");
+
+      if (cmd === "clear") {
         setHistory([]);
-        setInput("");
         return;
       }
 
-      let output: React.ReactNode;
       let type: HistoryEntryType = "output";
+      let node: React.ReactNode;
 
-      switch (command) {
+      switch (cmd) {
         case "help":
-          output = (
-            <div className="space-y-1 text-white/80">
-              {TERMINAL.helpOutput.map((line, i) => (
-                <div key={i}>{line}</div>
+          node = (
+            <div className="space-y-1 text-slate-300">
+              {TERMINAL.helpLines.map((line) => (
+                <div key={line}>{line}</div>
               ))}
             </div>
           );
           break;
         case "whoami":
-          output = (
+          node = (
             <div className="space-y-1">
-              <div className="font-bold text-cyan-300">{TERMINAL.whoamiName}</div>
-              <div className="text-white/70">{TERMINAL.whoamiBio}</div>
+              <div className="font-semibold text-sky-300">{PROFILE.fullName}</div>
+              <div className="text-slate-300">{PROFILE.bio}</div>
+              <div className="text-slate-400">{PROFILE.university}</div>
             </div>
           );
           break;
         case "skills":
-          output = (
-            <div className="space-y-1">
-              <div className="text-white/70">{TERMINAL.skillsLabel}</div>
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {SKILLS.map((skill) => (
-                  <span key={skill} className="bg-white/10 px-2 py-0.5 rounded text-xs">
-                    {skill}
-                  </span>
-                ))}
-              </div>
+          node = (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {SKILLS.map((skill) => (
+                <span
+                  key={skill}
+                  className="rounded border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-slate-200"
+                >
+                  {skill}
+                </span>
+              ))}
             </div>
           );
           break;
         case "projects":
-          output = (
-            <div className="space-y-2">
-              {PROJECTS.map((project, i) => (
-                <div key={project.title} className="text-xs">
-                  <span style={{ color: project.color }}>0{i + 1}.</span>{" "}
-                  <span className="font-bold text-white">{project.title}</span> —{" "}
-                  <span className="text-white/50">{project.metric}</span>
+          node = (
+            <div className="space-y-1.5">
+              {PROJECTS.map((p, i) => (
+                <div key={p.title}>
+                  <span style={{ color: p.color }}>
+                    {String(i + 1).padStart(2, "0")}.
+                  </span>{" "}
+                  <span className="font-semibold text-white">{p.title}</span>{" "}
+                  <span className="text-slate-400">({p.metric})</span>
                 </div>
               ))}
             </div>
           );
           break;
         case "email":
-          output = (
-            <a href={`mailto:${PROFILE.email}`} className="text-cyan-300 underline">
+          node = (
+            <a href={`mailto:${PROFILE.email}`} className="text-sky-300 underline">
               {PROFILE.email}
             </a>
           );
           break;
-
-        case "linkedin":
-          output = (
-            <a
-              href={PROFILE.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-cyan-300 underline"
-            >
-              {PROFILE.linkedin}
-            </a>
-          );
-          break;
-
         case "github":
-          output = (
+          node = (
             <a
               href={PROFILE.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-cyan-300 underline"
+              className="text-sky-300 underline"
             >
               {PROFILE.github}
             </a>
           );
           break;
-
+        case "linkedin":
+          node = (
+            <a
+              href={PROFILE.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-300 underline"
+            >
+              {PROFILE.linkedin}
+            </a>
+          );
+          break;
         case "resume":
-          output = (
+          node = (
             <a
               href={PROFILE.resume}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-cyan-300 underline"
+              className="text-sky-300 underline"
             >
-              Download Resume
+              Open / Download Résumé (PDF)
             </a>
           );
           break;
-
         case "theme":
           onToggleTheme();
-          output = TERMINAL.themeToggled;
+          node = "Switched color theme.";
           break;
         case "date":
-          output = new Date().toLocaleString([], {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+          node = new Date().toLocaleString();
           break;
         default:
           type = "error";
-          output = `${TERMINAL.errorPrefix}${rawCommand}${TERMINAL.errorSuffix}`;
+          node = `Command not found: "${trimmed}". Type 'help' to list available commands.`;
       }
 
-      pushEntry(rawCommand, type, output);
+      const promptId = nextId.current++;
+      const outId = nextId.current++;
+      setHistory((prev) => [
+        ...prev,
+        { id: promptId, type: "prompt", node: `$ ${trimmed}` },
+        { id: outId, type, node },
+      ]);
+      scrollLogToBottom();
     },
-    [onToggleTheme, pushEntry]
+    [onToggleTheme, scrollLogToBottom],
   );
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (input.trim()) handleCommand(input);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      if (commandLog.length === 0) return;
-      const next = historyCursor === -1 ? commandLog.length - 1 : Math.max(0, historyCursor - 1);
-      setHistoryCursor(next);
-      setInput(commandLog[next] ?? "");
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      if (historyCursor === -1) return;
-      const next = historyCursor + 1;
-      if (next >= commandLog.length) {
-        setHistoryCursor(-1);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (cmdHistory.length === 0) return;
+      const nextCursor = cursor === -1 ? cmdHistory.length - 1 : Math.max(0, cursor - 1);
+      setCursor(nextCursor);
+      setInput(cmdHistory[nextCursor]);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (cursor === -1) return;
+      if (cursor >= cmdHistory.length - 1) {
+        setCursor(-1);
         setInput("");
       } else {
-        setHistoryCursor(next);
-        setInput(commandLog[next] ?? "");
+        const nextCursor = cursor + 1;
+        setCursor(nextCursor);
+        setInput(cmdHistory[nextCursor]);
       }
-    } else if (event.key === "Tab") {
-      event.preventDefault();
-      const fragment = input.trim().toLowerCase();
-      if (!fragment) return;
-      const match = TERMINAL_COMMANDS.find((c) => c.startsWith(fragment));
-      if (match) {
-        setInput(match);
-        setHistoryCursor(-1);
-      }
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      const q = input.trim().toLowerCase();
+      if (!q) return;
+      const match = TERMINAL_COMMANDS.find((c) => c.startsWith(q));
+      if (match) setInput(match);
     }
   };
 
   return (
-    <div className="overflow-hidden rounded-[2.5rem] border border-[var(--glass-border)] bg-[#07090E] text-white shadow-[var(--shadow-heavy)]">
-      <div className="flex items-center justify-between border-b border-white/10 px-6 py-4 bg-black/[0.03] dark:bg-white/[0.03]">
-        <div className="flex items-center gap-2 text-xs font-mono text-white/50">
-          <Terminal size={14} className="text-blue-400" aria-hidden="true" />
-          <span>{TERMINAL.secureInterface}</span>
+    <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-[var(--glass-border-strong)] bg-[#080B12] text-white shadow-[var(--shadow-heavy)]">
+      <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
+        <div className="flex items-center gap-2 font-mono text-xs text-slate-400">
+          <Terminal size={14} className="text-sky-400" aria-hidden="true" />
+          <span>{TERMINAL.promptLabel}</span>
         </div>
         <div className="flex gap-1.5" aria-hidden="true">
           <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
@@ -968,50 +723,69 @@ function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
         </div>
       </div>
 
+      {/* Quick command chips */}
+      <div className="flex flex-wrap gap-1.5 border-b border-white/10 bg-white/[0.02] px-5 py-2.5">
+        {(["whoami", "projects", "skills", "date", "theme", "clear"] as const).map(
+          (cmd) => (
+            <button
+              key={cmd}
+              type="button"
+              onClick={() => {
+                runCommand(cmd);
+                inputRef.current?.focus();
+              }}
+              className="rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1 font-mono text-[11px] text-slate-300 transition-colors hover:border-sky-400/50 hover:text-white"
+            >
+              {cmd}
+            </button>
+          ),
+        )}
+      </div>
+
       <div
         ref={logRef}
         role="log"
         aria-live="polite"
-        className="custom-scrollbar min-h-[280px] max-h-[380px] overflow-y-auto p-6 font-mono text-xs sm:text-sm leading-relaxed"
+        onClick={() => inputRef.current?.focus()}
+        className="custom-scrollbar min-h-[250px] max-h-[340px] flex-1 space-y-2 overflow-y-auto p-5 font-mono text-xs leading-relaxed sm:text-sm"
       >
-        {history.map((entry, i) => (
+        {history.map((entry) => (
           <div
-            key={i}
-            className={`py-1 whitespace-pre-wrap ${entry.type === "prompt"
-              ? "text-cyan-300 font-semibold"
-              : entry.type === "error"
-                ? "text-rose-400"
-                : "text-white/80"
-              }`}
+            key={entry.id}
+            className={
+              entry.type === "prompt"
+                ? "font-semibold text-sky-300"
+                : entry.type === "error"
+                  ? "text-rose-400"
+                  : "text-slate-200"
+            }
           >
-            {entry.text}
+            {entry.node}
           </div>
         ))}
       </div>
 
       <form
-        onSubmit={handleSubmit}
-        onClick={() => inputRef.current?.focus()}
-        className="flex cursor-text items-center gap-3 border-t border-white/10 px-6 py-4 bg-white/[0.01] transition-colors focus-within:bg-white/[0.03]"
+        onSubmit={(e) => {
+          e.preventDefault();
+          runCommand(input);
+        }}
+        className="flex items-center gap-2.5 border-t border-white/10 bg-white/[0.02] px-5 py-3.5 focus-within:bg-white/[0.04]"
       >
-        <span className="text-cyan-300 font-mono" aria-hidden="true">
-          {TERMINAL.prompt}
+        <span className="font-mono text-sky-400" aria-hidden="true">
+          $
         </span>
         <input
           ref={inputRef}
           type="text"
           value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            setHistoryCursor(-1);
-          }}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           aria-label="Terminal command input"
           autoComplete="off"
-          autoCapitalize="off"
           spellCheck={false}
-          className="flex-1 bg-transparent font-mono text-xs sm:text-sm text-white outline-none placeholder:text-white/20 caret-[var(--focus)]"
           placeholder={TERMINAL.placeholder}
+          className="flex-1 bg-transparent font-mono text-xs text-white outline-none placeholder:text-slate-500 sm:text-sm"
         />
       </form>
     </div>
@@ -1019,713 +793,127 @@ function TerminalContact({ onToggleTheme }: { onToggleTheme: () => void }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Skills Constellation                                                      */
-/* -------------------------------------------------------------------------- */
-function SkillsConstellation() {
-  const groups = useMemo(() => {
-    const map = new Map<string, string[]>();
-    SKILLS.forEach((skill) => {
-      const category =
-        SKILL_CATEGORIES.find((c) => c.pattern.test(skill))?.name ?? "Core Stack";
-      const existing = map.get(category) ?? [];
-      existing.push(skill);
-      map.set(category, existing);
-    });
-    return Array.from(map.entries());
-  }, []);
-
-  return (
-    <div className="mx-auto mt-14 max-w-5xl">
-      <div className="flex flex-col gap-8 text-left">
-        {groups.map(([category, items]) => (
-          <div key={category} className="border-t border-[var(--line)] pt-5">
-            <p className="mb-3 text-[15px] font-semibold text-[var(--ink)]">
-              {category}
-            </p>
-            <div className="flex flex-wrap justify-start gap-2">
-              {items.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass)] px-4 py-2 text-[13px] text-[var(--ink)]"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Interfaces & Types                                                        */
-/* -------------------------------------------------------------------------- */
-export interface ProjectItem {
-  title: string;
-  summary: string;
-  description?: string;
-  image?: string;
-  color: string;
-  tech: string[];
-  metric: string;
-  label: string;
-  github: string;
-  liveUrl?: string;
-  highlights?: string[];
-}
-
-export interface ProjectGridCardProps {
-  project: ProjectItem;
-  index: number;
-  caseStudyPrefix: string;
-  onOpen: () => void;
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Fallback Compact Canvas Preview                                           */
-/* -------------------------------------------------------------------------- */
-const FallbackProductPreview: FC<{ color: string; seed: number }> = ({ color, seed }) => (
-  <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#121614] p-4">
-    <div
-      className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"
-      style={{ maskImage: "radial-gradient(ellipse 70% 60% at 50% 50%, #000 70%, transparent 100%)" }}
-    />
-    <div className="relative z-10 grid w-full max-w-xs grid-cols-2 gap-2 opacity-90 transition-transform duration-500 ease-out group-hover:scale-[1.02]">
-      <div className="col-span-2 rounded-xl border border-white/10 bg-black/[0.03] dark:bg-white/[0.05] p-3 backdrop-blur-md">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: color }} />
-            <span className="text-[10px] font-mono text-white/70">Core Engine #{seed}</span>
-          </div>
-          <Cpu className="h-3.5 w-3.5 text-white/40" />
-        </div>
-        <div className="mt-2 h-1 w-3/4 rounded-full bg-white/10" />
-      </div>
-      <div className="rounded-xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md">
-        <TrendingUp className="h-3.5 w-3.5" style={{ color }} />
-        <div className="mt-1 text-sm font-bold text-white">+142%</div>
-      </div>
-      <div className="rounded-xl border border-white/10 bg-white/5 p-2.5 backdrop-blur-md">
-        <Code2 className="h-3.5 w-3.5 text-white/60" />
-        <div className="mt-1 text-sm font-bold text-white">99.9%</div>
-      </div>
-    </div>
-  </div>
-);
-
-/* -------------------------------------------------------------------------- */
-/*  Project Card — full-width, image-led, one per row                        */
-/*                                                                            */
-/*  Why the old two-column card had to go: at ~7/12 + 5/12 split, the image  */
-/*  was cropped to a supporting-actor role and the metadata column had to    */
-/*  clamp the summary to two lines. That's the layout you reach for when you */
-/*  have twelve projects to list, not when you have a handful worth a real   */
-/*  showcase. Apple's product pages never split hero art with copy 60/40 —   */
-/*  the art gets the full stage, then the copy gets its own full-width beat  */
-/*  underneath it. This card follows that rhythm: image first, full bleed,   */
-/*  then title → summary → stack → metric → actions in one generous column. */
-/* -------------------------------------------------------------------------- */
-export function ProjectGridCard({
-  project,
-  index,
-  caseStudyPrefix,
-  onOpen,
-}: ProjectGridCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = usePrefersReducedMotion();
-
-  const rawMouseX = useMotionValue(0.5);
-  const rawMouseY = useMotionValue(0.5);
-  const springConfig = { stiffness: 160, damping: 20, mass: 0.5 };
-  const mouseX = useSpring(rawMouseX, springConfig);
-  const mouseY = useSpring(rawMouseY, springConfig);
-
-  // A full-width card is too large for a convincing 3D tilt across its whole
-  // body (it reads as "the page is warping"), so the tilt is scoped to the
-  // image plate only, and kept subtle — a hint of depth, not a gimmick.
-  const rotateX = useTransform(mouseY, [0, 1], shouldReduceMotion ? [0, 0] : [1.4, -1.4]);
-  const rotateY = useTransform(mouseX, [0, 1], shouldReduceMotion ? [0, 0] : [-1.4, 1.4]);
-  const imageX = useTransform(mouseX, [0, 1], shouldReduceMotion ? [0, 0] : [-10, 10]);
-  const imageY = useTransform(mouseY, [0, 1], shouldReduceMotion ? [0, 0] : [-8, 8]);
-  const spotX = useTransform(mouseX, [0, 1], [0, 100]);
-  const spotY = useTransform(mouseY, [0, 1], [0, 100]);
-
-  const handleMouseMove = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      if (!cardRef.current || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-      const rect = cardRef.current.getBoundingClientRect();
-      rawMouseX.set((event.clientX - rect.left) / rect.width);
-      rawMouseY.set((event.clientY - rect.top) / rect.height);
-    },
-    [rawMouseX, rawMouseY]
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    rawMouseX.set(0.5);
-    rawMouseY.set(0.5);
-  }, [rawMouseX, rawMouseY]);
-
-  // Per-card scroll trigger (rather than inheriting the parent grid's single
-  // whileInView) is what makes projects "reveal naturally" one at a time as
-  // the page scrolls, instead of the whole stack animating together the
-  // moment the section edge crosses the viewport.
-  const revealVariants: Variants = shouldReduceMotion
-    ? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.4 } } }
-    : {
-      hidden: { opacity: 0, y: 56, scale: 0.97 },
-      show: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: { type: "spring", stiffness: 90, damping: 20, mass: 0.9 },
-      },
-    };
-
-  return (
-    <motion.div
-      variants={revealVariants}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.25 }}
-      className="group min-w-0"
-    >
-      <motion.article
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        className="relative w-full overflow-hidden rounded-[20px] border border-[var(--card-border)] bg-[var(--card)] shadow-[var(--shadow)] transition-shadow duration-500 hover:shadow-[var(--shadow-heavy)]"
-      >
-        {/* Animated accent border — a 1px ring that fades in on hover using
-            the project's own color, instead of a static border everywhere. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[2rem] opacity-0 ring-1 transition-opacity duration-500 group-hover:opacity-100 sm:rounded-[2.5rem]"
-          style={{ boxShadow: `inset 0 0 0 1px ${project.color}40` }}
-        />
-
-        {/* ---- Image plate: full width, top of the card ----
-            This element is the clip mask ONLY. It must never also carry a
-            CSS `perspective` (a 3D-transform root): a single element that
-            is both an `overflow-hidden` + `border-radius` clip *and* a 3D
-            perspective root is exactly the combination mobile Safari/WebKit
-            is known to mis-render — it silently drops the rounded clip on
-            any descendant using a 3D transform, so the image bleeds to
-            square corners at the card's true edge. `perspective` now lives
-            on the inner tilt layer instead (see below), and `transform-gpu`
-            + the mask-image are a standard belt-and-braces nudge that force
-            Safari onto a real compositing layer for the clip itself. */}
-        <div
-          className="relative transform-gpu overflow-hidden rounded-t-[2rem] sm:rounded-t-[2.5rem]"
-          style={{
-            aspectRatio: "18 / 8",
-            WebkitMaskImage: "-webkit-radial-gradient(white, black)",
-          }}
-        >
-          <motion.div
-            style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1200 }}
-            className="absolute inset-0 will-change-transform"
-          >
-            {/* Ambient color wash behind the image edges, like a product
-                photo lit against a gelled backdrop rather than a flat crop. */}
-            <div
-              aria-hidden="true"
-              className="absolute -inset-6 opacity-40 blur-2xl"
-              style={{ background: `radial-gradient(60% 60% at 50% 40%, ${project.color}, transparent 70%)` }}
-            />
-            <motion.div style={{ x: imageX, y: imageY }} className="absolute inset-0 scale-[1.06]">
-              {project.image ? (
-                <img
-                  src={project.image}
-                  alt={`${project.title} preview`}
-                  loading="lazy"
-                  className="h-full w-full object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
-                />
-              ) : (
-                <FallbackProductPreview color={project.color} seed={index + 1} />
-              )}
-            </motion.div>
-          </motion.div>
-
-          {/* Legibility gradient + spotlight, both above the image */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-black/0"
-          />
-          <motion.div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-0 mix-blend-overlay transition-opacity duration-500 group-hover:opacity-100"
-            style={{
-              background: useTransform(
-                [spotX, spotY],
-                ([x, y]) => `radial-gradient(600px circle at ${x}% ${y}%, ${project.color}55, transparent 60%)`
-              ),
-            }}
-          />
-
-          <div className="absolute left-5 top-5 flex items-center gap-2 rounded-lg border border-white/20 bg-black/45 px-3 py-1.5 backdrop-blur-md sm:left-7 sm:top-7">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: project.color }} />
-            <span className="text-[13px] text-white">
-              {project.tech[0]}
-            </span>
-          </div>
-        </div>
-
-        <div className="relative z-20 p-5 sm:p-8 md:p-10">
-          <div className="max-w-3xl">
-            <h3 className="text-balance text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
-              {project.title}
-            </h3>
-            <p className="mt-4 max-w-2xl text-pretty text-[17px] leading-relaxed text-[var(--muted)]">
-              {project.summary}
-            </p>
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-2" aria-label="Technologies used">
-            {project.tech.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-md border border-[var(--glass-border)] bg-[var(--paper-2)] px-2.5 py-1 font-mono text-xs text-[var(--muted)]"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-6 flex flex-col gap-6 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-baseline gap-3">
-              <div className="font-mono text-3xl font-semibold tabular-nums tracking-tight text-[var(--ink)]">
-                {project.metric}
-              </div>
-              <div className="text-sm text-[var(--muted)]">
-                {project.label}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                aria-label={`Open ${project.title} code on GitHub`}
-                className={`grid h-11 w-11 place-items-center rounded-full border border-[var(--glass-border)] text-[var(--muted)] transition-colors hover:border-[var(--signal)] hover:text-[var(--ink)] ${FOCUS_RING}`}
-              >
-                <Github className="h-4 w-4" aria-hidden="true" />
-              </a>
-
-              <button
-                type="button"
-                onClick={onOpen}
-                aria-label={`Read notes on ${project.title}`}
-                className={`group/btn relative inline-flex h-11 items-center gap-2 rounded-full bg-[var(--ink)] px-6 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--signal)] hover:text-white ${FOCUS_RING}`}
-              >
-                <span>Read notes</span>
-                <ArrowUpRight
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.article>
-    </motion.div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Project Modal                                                             */
-/* -------------------------------------------------------------------------- */
-export function ProjectModal({
-  project,
-  index,
-  caseStudyPrefix = "CASE — ",
-  onClose,
-}: {
-  project: ProjectItem | null;
-  index: number;
-  caseStudyPrefix?: string;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    if (project) {
-      document.body.style.overflow = "hidden";
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "Escape") onClose();
-      };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        document.body.style.overflow = "unset";
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [project, onClose]);
-
-  if (!project) return null;
-
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6 md:p-8">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 bg-black/50 backdrop-blur-xl"
-        />
-
-        <motion.div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="project-modal-title"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ type: "spring", stiffness: 300, damping: 28 }}
-          onClick={(e) => e.stopPropagation()}
-          className="relative z-10 flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[20px] border border-[var(--glass-border-strong)] bg-[var(--card)] text-[var(--ink)] shadow-[var(--shadow-heavy)]"
-        >
-          <div className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--glass-border)] bg-[var(--card)] px-6 py-3.5">
-            <div className="flex items-center gap-2.5">
-              <span className="rounded-md border border-[var(--glass-border)] bg-[var(--paper)] px-2.5 py-1 text-[13px] text-[var(--muted)]">
-                {project.tech[0]}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close dialog"
-              className={`flex h-8 w-8 items-center justify-center rounded-full border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--ink)] transition-all hover:scale-105 ${FOCUS_RING}`}
-            >
-              <X className="h-3.5 w-3.5" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div className="flex-1 space-y-7 overflow-y-auto p-6 sm:p-8 custom-scrollbar">
-            <div className="relative overflow-hidden rounded-xl border border-[var(--glass-border)] bg-[var(--paper)] p-6">
-              <div className="relative z-10 max-w-2xl">
-                <h2 id="project-modal-title" className="text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
-                  {project.title}
-                </h2>
-                <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-[var(--muted)]">
-                  {project.description || project.summary}
-                </p>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--card)] p-4">
-                  <div className="font-mono text-xl font-semibold tabular-nums text-[var(--ink)] sm:text-2xl">
-                    {project.metric}
-                  </div>
-                  <div className="mt-1 text-[13px] text-[var(--muted)]">
-                    {project.label}
-                  </div>
-                </div>
-
-                <div className="col-span-1 flex flex-col justify-center rounded-lg border border-[var(--glass-border)] bg-[var(--card)] p-4 sm:col-span-3">
-                  <div className="mb-2 text-[13px] text-[var(--muted)]">
-                    Built with
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.tech.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-md border border-[var(--glass-border)] bg-[var(--paper)] px-2.5 py-1 font-mono text-xs text-[var(--muted)]"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Image container */}
-            {project.image && (
-              <div className="overflow-hidden rounded-2xl border border-[var(--glass-border)] bg-[var(--card)] shadow-[var(--shadow)]">
-                <img
-                  src={project.image}
-                  alt={`${project.title} screenshots`}
-                  loading="lazy"
-                  className="w-full object-cover aspect-[16/10]"
-                />
-              </div>
-            )}
-
-            {project.highlights && project.highlights.length > 0 && (
-              <div>
-                <h3 className="text-[15px] font-semibold text-[var(--ink)]">
-                  Notes from the build
-                </h3>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {project.highlights.map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-2.5 rounded-lg border border-[var(--glass-border)] bg-[var(--paper)] p-3 text-sm text-[var(--muted)]"
-                    >
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--signal)]" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="sticky bottom-0 z-30 flex items-center justify-between gap-3 border-t border-[var(--glass-border)] bg-[var(--card)] px-6 py-4">
-            <div className="flex items-center gap-2">
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center gap-2 rounded-full border border-[var(--glass-border)] px-5 py-2.5 text-sm font-semibold text-[var(--ink)] transition-colors hover:border-[var(--signal)] ${FOCUS_RING}`}
-              >
-                <Github className="h-4 w-4" aria-hidden="true" />
-                <span>Open code</span>
-              </a>
-              {project.liveUrl && (
-                <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-2 rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-semibold text-[var(--paper)] transition-colors hover:bg-[var(--signal)] hover:text-white ${FOCUS_RING}`}
-                >
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                  <span>Open live page</span>
-                </a>
-              )}
-            </div>
-
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Main Projects Section Component                                           */
-/* -------------------------------------------------------------------------- */
-export function ProjectsSection({
-  projects = [],
-  sectionHeading = PROJECTS_SECTION.heading,
-  caseStudyPrefix = "",
-  onOpenProject,
-}: {
-  projects?: ProjectItem[];
-  sectionHeading?: string | { start: string; end: string };
-  caseStudyPrefix?: string;
-  onOpenProject?: (index: number) => void;
-}) {
-  const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
-
-  const activeProject = selectedProjectIndex !== null ? projects[selectedProjectIndex] : null;
-  const headingText =
-    typeof sectionHeading === "string"
-      ? sectionHeading
-      : `${sectionHeading.start} ${sectionHeading.end}`;
-
-  return (
-    <section id="projects" aria-labelledby="projects-heading" className="relative mx-auto max-w-[96rem] scroll-mt-28 px-4 py-20 sm:px-6 md:py-28 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="flex flex-col gap-6 border-b border-[var(--line)] pb-8 md:flex-row md:items-end md:justify-between">
-          <div className="border-l-2 border-[var(--signal)] pl-4">
-            <h2 id="projects-heading" className="text-balance text-[clamp(2.25rem,5vw,4rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--ink)]">
-              {headingText}
-            </h2>
-          </div>
-          <p className="max-w-md text-pretty text-[15px] leading-relaxed text-[var(--muted)] md:text-right">
-            {PROJECTS_SECTION.description}
-          </p>
-        </div>
-      </div>
-
-      {/* One project per row, full width. Generous vertical gap so each
-          project reads as its own cinematic beat rather than a dense list. */}
-      <div className="mx-auto mt-14 flex max-w-5xl flex-col gap-20 sm:gap-28 md:mt-20 md:gap-36">
-        {projects.map((project, i) => (
-          <ProjectGridCard
-            key={project.title}
-            project={project}
-            index={i}
-            caseStudyPrefix={caseStudyPrefix}
-            onOpen={() => {
-              setSelectedProjectIndex(i);
-              onOpenProject?.(i);
-            }}
-          />
-        ))}
-      </div>
-
-      {!onOpenProject && (
-        <ProjectModal
-          project={activeProject}
-          index={selectedProjectIndex ?? 0}
-          caseStudyPrefix={caseStudyPrefix}
-          onClose={() => setSelectedProjectIndex(null)}
-        />
-      )}
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Main Portfolio Page Component                                             */
+/*  Main Portfolio                                                            */
 /* -------------------------------------------------------------------------- */
 export default function Portfolio() {
-  const [light, setLight] = useTheme();
-  const [loaded, setLoaded] = useState(false);
-  const [modalIndex, setModalIndex] = useState<number | null>(null);
-  const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
-  const [compact, setCompact] = useState<boolean>(false);
-  const [activeSection, setActiveSection] = useState<string>(
-    NAVIGATION_ITEMS[0].href.replace("#", "")
-  );
-  const [now, setNow] = useState<Date | null>(null);
-  const reduced = usePrefersReducedMotion();
-  const scrollProgress = useMotionValue(0);
-  const scrollProgressSpring = useSpring(scrollProgress, { stiffness: 130, damping: 28 });
+  const [light, toggleTheme] = useTheme();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [compact, setCompact] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("about");
+  const [selectedCategory, setSelectedCategory] = useState<"All" | ProjectCategory>("All");
+  const [modalProjectIndex, setModalProjectIndex] = useState<number | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
-  const toggleTheme = useCallback(() => setLight((prev) => !prev), [setLight]);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 160, damping: 28, restDelta: 0.001 });
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const onScroll = () => setCompact(window.scrollY > UI.scrollCompactThreshold);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useRafThrottledScroll(() => {
-    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    scrollProgress.set(window.scrollY / maxScroll);
-    setCompact(window.scrollY > UI.scrollCompactThreshold);
-  }, [scrollProgress]);
 
   useEffect(() => {
     const sections = NAVIGATION_ITEMS.map((item) =>
-      document.getElementById(item.href.replace("#", ""))
+      document.getElementById(item.href.slice(1)),
     ).filter((el): el is HTMLElement => el !== null);
+
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        for (const entry of entries) {
           if (entry.isIntersecting) setActiveSection(entry.target.id);
-        });
+        }
       },
-      { rootMargin: "-45% 0px -45% 0px" }
+      { rootMargin: "-42% 0px -42% 0px" },
     );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
-  }, [loaded]);
 
-  useEffect(() => {
-    setNow(new Date());
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (reduced) return;
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
-        gsap.fromTo(
-          el,
-          { opacity: 0, y: 16 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
-            overwrite: true,
-            scrollTrigger: { trigger: el, start: "top 88%", once: true },
-          }
-        );
-      });
-    });
-    return () => ctx.revert();
-  }, [reduced]);
+  const filteredProjects = useMemo(
+    () =>
+      PROJECTS.map((project, originalIndex) => ({ project, originalIndex })).filter(
+        ({ project }) =>
+          selectedCategory === "All" || project.category === selectedCategory,
+      ),
+    [selectedCategory],
+  );
 
-  const themeVars = useMemo<ThemeVars>(() => (light ? LIGHT_THEME : DARK_THEME), [light]);
-  const activeProject = modalIndex !== null ? PROJECTS[modalIndex] : null;
+  const copyEmail = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(PROFILE.email);
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2000);
+    } catch {
+      window.location.href = `mailto:${PROFILE.email}`;
+    }
+  }, []);
+
+  const activeProject = modalProjectIndex !== null ? PROJECTS[modalProjectIndex] : null;
 
   return (
-    <main
-      style={themeVars as React.CSSProperties}
-      className="md:cursor-none overflow-clip bg-[var(--paper)] text-[var(--ink)] transition-colors duration-700"
-    >
+    <div className="relative min-h-screen overflow-x-clip text-[var(--ink)]">
       <a
         href="#home"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-full focus:bg-[var(--ink)] focus:px-4 focus:py-2 focus:text-[var(--paper)]"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-[var(--ink)] focus:px-4 focus:py-2 focus:text-xs focus:font-semibold focus:text-[var(--paper)]"
       >
         Skip to content
       </a>
 
-      <AnimatePresence>
-        {!loaded && <LoaderScreen onDone={() => setLoaded(true)} />}
-      </AnimatePresence>
+      <Background />
 
-      <Background reduced={reduced} />
-      <Cursor />
-
+      {/* Scroll Progress */}
       <motion.div
-        style={{ scaleX: scrollProgressSpring }}
-        className="fixed left-0 top-0 z-[110] h-[2px] w-full origin-left bg-[var(--signal)]"
+        style={{ scaleX }}
+        aria-hidden="true"
+        className="fixed left-0 top-0 z-[110] h-[2px] w-full origin-left bg-gradient-to-r from-[var(--signal)] to-[var(--signal-2)]"
       />
 
-      {/* Navigation */}
-      <nav
-        className={`fixed left-1/2 top-4 z-50 w-[min(1080px,calc(100%-24px))] -translate-x-1/2 transition-all duration-500 ${mobileNavOpen ? "rounded-[28px]" : "rounded-full"
-          }`}
-      >
-        <div
-          className={`relative overflow-visible border border-[var(--glass-border-strong)] bg-[var(--glass)] backdrop-blur-3xl shadow-[var(--shadow-heavy)] transition-all duration-500 ${mobileNavOpen ? "rounded-[20px]" : "rounded-full"
-            }`}
+      {/* Floating Header */}
+      <header className="fixed left-1/2 top-4 z-50 w-[min(1080px,calc(100%-24px))] -translate-x-1/2">
+        <nav
+          aria-label="Primary"
+          className="relative rounded-full border border-[var(--glass-border-strong)] bg-[var(--glass)] backdrop-blur-2xl shadow-[var(--shadow-heavy)]"
         >
           <div
-            className={`relative flex items-center justify-between px-4 sm:px-6 transition-all duration-300 ${compact ? "h-12 sm:h-14" : "h-14 sm:h-16"
-              }`}
+            className={`flex items-center justify-between px-4 transition-[height] duration-300 sm:px-5 ${
+              compact ? "h-12 sm:h-14" : "h-14 sm:h-16"
+            }`}
           >
             <a
               href="#home"
-              className={`flex items-center gap-3 whitespace-nowrap rounded-full ${FOCUS_RING}`}
+              className={`flex items-center gap-2.5 rounded-full ${FOCUS_RING}`}
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--signal)] font-mono text-[13px] font-semibold text-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--signal-wash)] font-mono text-xs font-bold text-[var(--signal)]">
                 {PROFILE.initials}
-              </div>
-              <div className="hidden min-[430px]:block">
-                <p className="text-[15px] font-semibold tracking-tight text-[var(--ink)] leading-none">
-                  {PROFILE.fullName}
-                </p>
-                <p className="mt-1 text-[13px] text-[var(--muted)]">
-                  Data scientist
-                </p>
-              </div>
+              </span>
+              <span className="hidden text-sm font-bold tracking-tight text-[var(--ink)] min-[420px]:inline">
+                {PROFILE.fullName}
+              </span>
             </a>
 
-            {/* Desktop Navigation */}
-            <div className="hidden items-center rounded-full border border-[var(--glass-border)] bg-[var(--glass)] p-1 md:flex">
+            <div className="hidden items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--paper)]/50 p-1 md:flex">
               {NAVIGATION_ITEMS.map((item) => {
-                const id = item.href.replace("#", "");
+                const id = item.href.slice(1);
                 const isActive = activeSection === id;
-
                 return (
                   <a
                     key={id}
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`relative px-4 py-2 text-xs font-semibold rounded-full transition-all duration-300 ${FOCUS_RING} ${isActive
-                      ? "text-[var(--ink)]"
-                      : "text-[var(--muted)] hover:text-[var(--ink)]"
-                      }`}
+                    className={`relative rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+                      isActive
+                        ? "text-[var(--ink)]"
+                        : "text-[var(--muted)] hover:text-[var(--ink)]"
+                    }`}
                   >
                     {isActive && (
                       <motion.span
                         layoutId="nav-pill"
-                        transition={{
-                          type: "spring",
-                          stiffness: 420,
-                          damping: 32,
-                        }}
-                        className="absolute inset-0 -z-10 rounded-full bg-[var(--signal-wash)]"
+                        transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                        className="absolute inset-0 -z-10 rounded-full border border-[var(--signal)]/35 bg-[var(--signal-wash)]"
                       />
                     )}
                     {item.label}
@@ -1734,278 +922,527 @@ export default function Portfolio() {
               })}
             </div>
 
-            {/* Right Actions */}
             <div className="flex items-center gap-2">
-              <Magnetic>
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  aria-label={light ? "Switch to dark mode" : "Switch to light mode"}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--muted)] transition-all duration-300 hover:scale-105 hover:border-[var(--signal)]/40 hover:text-[var(--signal)] ${FOCUS_RING}`}
-                >
-                  {light ? (
-                    <Sun size={17} aria-hidden="true" />
-                  ) : (
-                    <Moon size={17} aria-hidden="true" />
-                  )}
-                </button>
-              </Magnetic>
+              <a
+                href={PROFILE.resume}
+                download
+                className={`hidden items-center gap-1.5 rounded-full border border-[var(--glass-border)] bg-[var(--paper)]/70 px-3.5 py-2 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--signal)]/50 sm:inline-flex ${FOCUS_RING}`}
+              >
+                <Download size={13} aria-hidden="true" />
+                <span>Résumé</span>
+              </a>
 
               <button
                 type="button"
-                onClick={() => setMobileNavOpen((prev) => !prev)}
+                onClick={toggleTheme}
+                aria-label={light ? "Switch to dark mode" : "Switch to light mode"}
+                className={`grid h-9 w-9 place-items-center rounded-full border border-[var(--glass-border)] bg-[var(--paper)]/70 text-[var(--muted)] transition-colors hover:border-[var(--signal)]/50 hover:text-[var(--ink)] ${FOCUS_RING}`}
+              >
+                {light ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen((v) => !v)}
                 aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileNavOpen}
-                className={`flex h-10 w-10 items-center justify-center rounded-full border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--muted)] transition-all duration-300 hover:scale-105 hover:border-[var(--signal)]/40 hover:text-[var(--signal)] md:hidden ${FOCUS_RING}`}
+                className={`grid h-9 w-9 place-items-center rounded-full border border-[var(--glass-border)] bg-[var(--paper)]/70 text-[var(--muted)] transition-colors hover:text-[var(--ink)] md:hidden ${FOCUS_RING}`}
               >
-                {mobileNavOpen ? (
-                  <X size={18} aria-hidden="true" />
-                ) : (
-                  <Menu size={18} aria-hidden="true" />
-                )}
+                {mobileNavOpen ? <X size={17} aria-hidden="true" /> : <Menu size={17} aria-hidden="true" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile Navigation */}
           <AnimatePresence>
             {mobileNavOpen && (
               <motion.div
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -15 }}
-                transition={{
-                  duration: 0.3,
-                }}
-                className="absolute left-0 right-0 top-[calc(100%+12px)] z-50 px-1 md:hidden"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.18 }}
+                className="absolute left-0 right-0 top-[calc(100%+10px)] overflow-hidden rounded-2xl border border-[var(--glass-border-strong)] bg-[var(--card)] p-2 shadow-[var(--shadow-heavy)] md:hidden"
               >
-                <div className="overflow-hidden rounded-2xl border border-[var(--glass-border-strong)] bg-[var(--card)] backdrop-blur-3xl shadow-[var(--shadow-heavy)]">
-                  <div className="flex flex-col gap-1 p-3">
-                    {NAVIGATION_ITEMS.map((item) => {
-                      const id = item.href.replace("#", "");
-                      const isActive = activeSection === id;
-
-                      return (
-                        <a
-                          key={id}
-                          href={item.href}
-                          onClick={() => setMobileNavOpen(false)}
-                          className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 hover:-translate-y-px ${FOCUS_RING} ${isActive
-                            ? "border border-[var(--signal)]/20 bg-[var(--signal)]/12 text-[var(--ink)]"
-                            : "text-[var(--muted)] hover:bg-[var(--glass)] hover:text-[var(--ink)]"
-                            }`}
-                        >
-                          <span>{item.label}</span>
-                          {isActive && (
-                            <span
-                              className="h-2 w-2 rounded-full bg-[var(--signal)]"
-                              style={{ boxShadow: "0 0 10px var(--signal)" }}
-                            />)}
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
+                {NAVIGATION_ITEMS.map((item) => {
+                  const id = item.href.slice(1);
+                  const isActive = activeSection === id;
+                  return (
+                    <a
+                      key={id}
+                      href={item.href}
+                      onClick={() => setMobileNavOpen(false)}
+                      className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium ${FOCUS_RING} ${
+                        isActive
+                          ? "bg-[var(--signal-wash)] text-[var(--ink)]"
+                          : "text-[var(--muted)] hover:text-[var(--ink)]"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {isActive && (
+                        <span className="h-2 w-2 rounded-full bg-[var(--signal)]" />
+                      )}
+                    </a>
+                  );
+                })}
+                <a
+                  href={PROFILE.resume}
+                  download
+                  onClick={() => setMobileNavOpen(false)}
+                  className="mt-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--ink)] px-4 py-3 text-sm font-semibold text-[var(--paper)]"
+                >
+                  <Download size={15} aria-hidden="true" />
+                  <span>{HERO.resumeButtonLabel}</span>
+                </a>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
-      {/* Hero */}
-      <Hero loaded={loaded} reduced={reduced} />
+      <main>
+        {/* Hero */}
+        <section
+          id="home"
+          className="mx-auto flex min-h-screen max-w-7xl flex-col justify-center px-5 pb-16 pt-28 sm:px-8 lg:px-10"
+        >
+          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-6">
+              <h1 className="text-[clamp(3rem,7.5vw,5.75rem)] font-extrabold leading-[0.92] tracking-[-0.05em] text-[var(--ink)]">
+                {HERO.headingLine1}
+                <br />
+                <span className="font-light text-[var(--muted)]">{HERO.headingLine2}</span>
+              </h1>
 
-      {/* About */}
-      <section id="about" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-24 sm:px-6 md:py-32 lg:px-8">
-        <div className="max-w-3xl border-l-2 border-[var(--signal)] pl-5">
-          <h2 data-reveal className="text-balance text-[clamp(2rem,5vw,4rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ink)]">
-            {ABOUT.heading}
-          </h2>
-        </div>
-        <div data-reveal className="mt-12 grid gap-5 md:grid-cols-2">
-          <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass)] p-8 shadow-[var(--shadow)]">
-            <p className="max-w-[62ch] text-[19px] leading-relaxed text-[var(--ink)]">
-              {ABOUT.description}
-            </p>
-          </div>
-          <div className="space-y-4">
-            {ABOUT.sections.map((section) => (
-              <div
-                key={section.title}
-                className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass)] p-6 shadow-[var(--shadow)]"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-[17px] font-semibold text-[var(--ink)]">{section.title}</h3>
-                  <ArrowUpRight size={16} className="text-[var(--muted)]" />
-                </div>
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {section.items.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-md border border-[var(--glass-border)] bg-[var(--paper-2)] px-2.5 py-1 font-mono text-xs text-[var(--muted)]"
-                    >
-                      {item}
-                    </span>
-                  ))}
+              <div className="mt-6">
+                <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-[var(--muted-2)]">
+                  {HERO.subHeading}
+                </p>
+                <div className="mt-1.5">
+                  <Roles />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section id="background" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6 md:py-24 lg:px-8">
-        <div className="flex flex-col gap-4 border-t border-[var(--line)] pt-10 md:flex-row md:items-end md:justify-between">
-          <h2 data-reveal className="max-w-xl text-balance text-[clamp(1.8rem,4vw,3rem)] font-semibold tracking-tight text-[var(--ink)]">
-            Background and focus
-          </h2>
-          <p data-reveal className="max-w-md text-[15px] leading-relaxed text-[var(--muted)]">
-            Education plus self-directed builds. Work you can open on GitHub.
+              <p className="mt-3 max-w-xl text-base leading-relaxed text-[var(--muted)] sm:text-lg">
+                {PROFILE.bio}
+              </p>
+
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <a
+                  href="#projects"
+                  className={`inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-6 py-3.5 text-sm font-semibold text-[var(--paper)] shadow-[var(--shadow)] transition-transform hover:-translate-y-0.5 ${FOCUS_RING}`}
+                >
+                  <span>{HERO.primaryButtonText}</span>
+                  <ArrowDown size={15} aria-hidden="true" />
+                </a>
+                <a
+                  href="#contact"
+                  className={`inline-flex items-center gap-2 rounded-full border border-[var(--glass-border-strong)] bg-[var(--glass)] px-6 py-3.5 text-sm font-semibold text-[var(--ink)] backdrop-blur-xl transition-colors hover:border-[var(--signal)]/50 ${FOCUS_RING}`}
+                >
+                  {HERO.secondaryButtonText}
+                </a>
+                <a
+                  href={PROFILE.resume}
+                  download
+                  aria-label={HERO.resumeButtonLabel}
+                  className={`grid h-12 w-12 place-items-center rounded-full border border-[var(--glass-border)] bg-[var(--glass)] text-[var(--ink)] transition-colors hover:border-[var(--signal)]/50 ${FOCUS_RING}`}
+                >
+                  <Download size={17} aria-hidden="true" />
+                </a>
+              </div>
+
+              {/* Compact proof strip */}
+              <div className="mt-10 grid max-w-lg grid-cols-3 gap-3 border-t border-[var(--line)] pt-7">
+                {HERO.metrics.map((m) => (
+                  <div key={m.label}>
+                    <div className="text-xl font-extrabold tracking-tight text-[var(--ink)] tabular-nums sm:text-2xl">
+                      {m.value}
+                    </div>
+                    <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted-2)]">
+                      {m.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-6">
+              <HeroVisual />
+            </div>
+          </div>
+        </section>
+
+        {/* About — Bento Grid */}
+        <section
+          id="about"
+          aria-labelledby="about-heading"
+          className="mx-auto max-w-7xl scroll-mt-24 px-5 py-20 sm:px-8 md:py-28 lg:px-10"
+        >
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-[var(--signal)]">
+            About
           </p>
-        </div>
-        <div data-reveal className="mt-10 grid gap-4 md:grid-cols-3">
-          {EXPERIENCE.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-xl border border-[var(--glass-border)] bg-[var(--glass)] p-6 shadow-[var(--shadow)]"
-            >
-              <p className="font-mono text-[13px] tabular-nums text-[var(--signal)]">
-                {item.period}
+          <h2
+            id="about-heading"
+            className="mt-3 max-w-4xl text-balance text-[clamp(2rem,5vw,3.75rem)] font-extrabold leading-[1.04] tracking-[-0.04em] text-[var(--ink)]"
+          >
+            {ABOUT.headingStart}{" "}
+            <span className="font-light text-[var(--muted)]">{ABOUT.headingEnd}</span>
+          </h2>
+
+          <div className="mt-12 grid gap-5 lg:grid-cols-12">
+            <div className="flex flex-col justify-between rounded-3xl border border-[var(--card-border)] bg-[var(--card)] p-7 shadow-[var(--shadow)] sm:p-9 lg:col-span-5">
+              <p className="text-lg font-medium leading-relaxed text-[var(--ink)] sm:text-xl">
+                {ABOUT.description}
               </p>
-              <h3 className="mt-3 text-[17px] font-semibold leading-snug text-[var(--ink)]">
-                {item.title}
-              </h3>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                {item.org}
-              </p>
-              <p className="mt-4 max-w-[62ch] text-[15px] leading-relaxed text-[var(--muted)]">
-                {item.detail}
+              <div className="mt-8 flex items-start gap-3 rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-4">
+                <GraduationCap
+                  size={20}
+                  className="mt-0.5 shrink-0 text-[var(--signal)]"
+                  aria-hidden="true"
+                />
+                <div>
+                  <div className="text-sm font-semibold text-[var(--ink)]">
+                    {PROFILE.degree}
+                  </div>
+                  <div className="mt-0.5 text-xs text-[var(--muted)]">
+                    {PROFILE.university}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:col-span-7">
+              {ABOUT.sections.map((section) => (
+                <div
+                  key={section.title}
+                  className="group rounded-3xl border border-[var(--card-border)] bg-[var(--card)] p-6 shadow-[var(--shadow)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--signal)]/40"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-[var(--ink)]">
+                      {section.title}
+                    </h3>
+                    <ArrowUpRight
+                      size={16}
+                      aria-hidden="true"
+                      className="text-[var(--muted-2)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--signal)]"
+                    />
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {section.items.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1 text-xs text-[var(--muted)]"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Expertise — Categorized Stack */}
+        <section
+          id="expertise"
+          aria-labelledby="expertise-heading"
+          className="border-y border-[var(--line)] bg-[var(--paper-2)]/50 px-5 py-20 sm:px-8 md:py-28 lg:px-10"
+        >
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-[0.25em] text-[var(--signal)]">
+                  Technical Stack
+                </p>
+                <h2
+                  id="expertise-heading"
+                  className="mt-3 text-[clamp(2rem,4.5vw,3.5rem)] font-extrabold leading-[1.04] tracking-[-0.04em] text-[var(--ink)]"
+                >
+                  {EXPERTISE.headingStart}{" "}
+                  <span className="font-light text-[var(--muted)]">
+                    {EXPERTISE.headingEnd}
+                  </span>
+                </h2>
+              </div>
+              <p className="max-w-md text-sm leading-relaxed text-[var(--muted)]">
+                {EXPERTISE.subtitle}
               </p>
             </div>
-          ))}
-        </div>
-      </section>
 
-      <section id="expertise" className="border-y border-[var(--line)] bg-[var(--paper-2)] px-6 py-20 md:py-24">
-        <div className="mx-auto max-w-5xl">
-          <h2 data-reveal className="max-w-2xl text-balance text-[clamp(1.9rem,5vw,3.4rem)] font-semibold tracking-tight text-[var(--ink)]">
-            {EXPERTISE.heading}
-          </h2>
-          <p data-reveal className="mt-4 max-w-xl text-[15px] leading-relaxed text-[var(--muted)]">
-            {EXPERTISE.subheading}
-          </p>
-          <div data-reveal>
-            <SkillsConstellation />
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {SKILL_GROUPS.map((group) => (
+                <div
+                  key={group.name}
+                  className="rounded-3xl border border-[var(--card-border)] bg-[var(--card)] p-6 shadow-[var(--shadow)]"
+                >
+                  <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted-2)]">
+                    {group.name}
+                  </h3>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {group.items.map((skill) => (
+                      <TechChip key={skill} name={skill} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <ProjectsSection
-        projects={PROJECTS}
-        sectionHeading={PROJECTS_SECTION.heading}
-        onOpenProject={setModalIndex}
-      />
-
-      <section id="contact" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-24 sm:px-6 md:py-32 lg:px-8">
-        <h2 data-reveal className="max-w-3xl text-balance text-[clamp(2rem,6vw,4.5rem)] font-semibold leading-[1.05] tracking-tight text-[var(--ink)]">
-          {CONTACT_SECTION.heading}
-        </h2>
-        <p data-reveal className="mt-5 max-w-xl text-base leading-relaxed text-[var(--muted)]">
-          {CONTACT_SECTION.description}
-        </p>
-        <div data-reveal className="mt-8 flex flex-wrap items-center gap-3">
-          <ShineButton href={`mailto:${PROFILE.email}`} variant="solid" dataCursor={UI.cursorContactLabel}>
-            <Mail size={16} aria-hidden="true" /> {PROFILE.email}
-          </ShineButton>
-          <ShineButton href={PROFILE.resume} variant="ghost" dataCursor={UI.cursorViewLabel}>
-            <Download size={16} aria-hidden="true" /> Resume
-          </ShineButton>
-        </div>
-        <div data-reveal className="mt-10">
-          <TerminalContact onToggleTheme={toggleTheme} />
-        </div>
-      </section>
-
-      <footer className="border-t border-[var(--line)] bg-[var(--paper-2)] p-6 sm:p-10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-xs">
-            <b className="text-lg font-semibold text-[var(--ink)]">{FOOTER.name}</b>
-            <p className="mt-1 text-sm text-[var(--muted)]">{FOOTER.role}</p>
-            <p className="mt-3 text-[13px] text-[var(--muted)]">
-              {FOOTER.tagline}
+        {/* Projects */}
+        <section
+          id="projects"
+          aria-labelledby="projects-heading"
+          className="mx-auto max-w-7xl scroll-mt-24 px-5 py-20 sm:px-8 md:py-28 lg:px-10"
+        >
+          <div className="flex flex-col gap-6 border-b border-[var(--line)] pb-8 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] text-[var(--signal)]">
+                <Layers size={14} aria-hidden="true" />
+                <span>Crafted Showcase</span>
+              </div>
+              <h2
+                id="projects-heading"
+                className="mt-3 text-[clamp(2rem,5vw,3.75rem)] font-extrabold leading-[1.02] tracking-[-0.04em] text-[var(--ink)]"
+              >
+                {PROJECTS_SECTION.headingStart}{" "}
+                <span className="font-light text-[var(--muted)]">
+                  {PROJECTS_SECTION.headingEnd}
+                </span>
+              </h2>
+            </div>
+            <p className="max-w-md text-sm leading-relaxed text-[var(--muted)] md:text-right">
+              {PROJECTS_SECTION.subtitle}
             </p>
           </div>
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            {NAVIGATION_ITEMS.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
-              >
-                {item.label}
-              </a>
+
+          {/* Category Filters */}
+          <div
+            role="tablist"
+            aria-label="Filter projects by category"
+            className="mt-8 flex flex-wrap gap-2"
+          >
+            {PROJECT_CATEGORIES.map((category) => {
+              const active = selectedCategory === category;
+              return (
+                <button
+                  key={category}
+                  role="tab"
+                  type="button"
+                  aria-selected={active}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+                    active
+                      ? "bg-[var(--ink)] text-[var(--paper)]"
+                      : "border border-[var(--glass-border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--ink)]"
+                  }`}
+                >
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Featured + 2-col Editorial Grid */}
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            {filteredProjects.map(({ project, originalIndex }, idx) => (
+              <ProjectCard
+                key={project.title}
+                project={project}
+                index={originalIndex}
+                featured={idx === 0 && filteredProjects.length > 1}
+                onOpen={() => setModalProjectIndex(originalIndex)}
+              />
             ))}
-          </nav>
-          <div className="flex items-center gap-2">
+          </div>
+        </section>
+
+        {/* Contact */}
+        <section
+          id="contact"
+          aria-labelledby="contact-heading"
+          className="mx-auto max-w-7xl scroll-mt-24 px-5 py-20 sm:px-8 md:py-28 lg:px-10"
+        >
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-[var(--signal)]">
+            Contact
+          </p>
+          <h2
+            id="contact-heading"
+            className="mt-3 max-w-4xl text-[clamp(2.25rem,6vw,4.5rem)] font-extrabold leading-[1] tracking-[-0.04em] text-[var(--ink)]"
+          >
+            {CONTACT_SECTION.headingStart}{" "}
+            <span className="font-light text-[var(--muted)]">
+              {CONTACT_SECTION.headingEnd}
+            </span>
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
+            {CONTACT_SECTION.subtitle}
+          </p>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-12">
+            {/* Direct Contact Bento */}
+            <div className="flex flex-col gap-4 lg:col-span-5">
+              <div className="rounded-3xl border border-[var(--card-border)] bg-[var(--card)] p-6 shadow-[var(--shadow)]">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted-2)]">
+                  Direct Email
+                </span>
+                <a
+                  href={`mailto:${PROFILE.email}`}
+                  className="mt-2 block break-all text-lg font-bold text-[var(--ink)] transition-colors hover:text-[var(--signal)]"
+                >
+                  {PROFILE.email}
+                </a>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={copyEmail}
+                    className={`inline-flex items-center gap-1.5 rounded-full bg-[var(--ink)] px-4 py-2 text-xs font-semibold text-[var(--paper)] transition-transform hover:-translate-y-0.5 ${FOCUS_RING}`}
+                  >
+                    {copiedEmail ? (
+                      <>
+                        <Check size={13} aria-hidden="true" />
+                        <span>Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={13} aria-hidden="true" />
+                        <span>Copy email</span>
+                      </>
+                    )}
+                  </button>
+                  <a
+                    href={`mailto:${PROFILE.email}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border border-[var(--glass-border)] px-4 py-2 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--signal)]/50 ${FOCUS_RING}`}
+                  >
+                    <Mail size={13} aria-hidden="true" />
+                    <span>Open mail app</span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <a
+                  href={PROFILE.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group flex flex-col justify-between rounded-3xl border border-[var(--card-border)] bg-[var(--card)] p-5 shadow-[var(--shadow)] transition-all hover:-translate-y-0.5 hover:border-[var(--signal)]/50 ${FOCUS_RING}`}
+                >
+                  <Linkedin size={20} className="text-[var(--signal)]" aria-hidden="true" />
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-sm font-bold text-[var(--ink)]">LinkedIn</span>
+                    <ArrowUpRight
+                      size={15}
+                      className="text-[var(--muted-2)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </a>
+
+                <a
+                  href={PROFILE.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group flex flex-col justify-between rounded-3xl border border-[var(--card-border)] bg-[var(--card)] p-5 shadow-[var(--shadow)] transition-all hover:-translate-y-0.5 hover:border-[var(--signal)]/50 ${FOCUS_RING}`}
+                >
+                  <Github size={20} className="text-[var(--signal)]" aria-hidden="true" />
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-sm font-bold text-[var(--ink)]">GitHub</span>
+                    <ArrowUpRight
+                      size={15}
+                      className="text-[var(--muted-2)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </a>
+              </div>
+
+              <a
+                href={PROFILE.resume}
+                download
+                className={`group flex items-center justify-between rounded-3xl border border-[var(--card-border)] bg-[var(--card)] p-5 shadow-[var(--shadow)] transition-all hover:-translate-y-0.5 hover:border-[var(--signal)]/50 ${FOCUS_RING}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--signal-wash)] text-[var(--signal)]">
+                    <Download size={17} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <div className="text-sm font-bold text-[var(--ink)]">
+                      {HERO.resumeButtonLabel}
+                    </div>
+                    <div className="text-xs text-[var(--muted)]">PDF · 1 page</div>
+                  </div>
+                </div>
+                <ArrowUpRight
+                  size={16}
+                  className="text-[var(--muted-2)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </a>
+            </div>
+
+            {/* Interactive Terminal */}
+            <div className="lg:col-span-7">
+              <TerminalContact onToggleTheme={toggleTheme} />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-[var(--line)] bg-[var(--paper-2)] px-5 py-10 sm:px-8 lg:px-10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-lg font-bold text-[var(--ink)]">{FOOTER.name}</div>
+            <p className="text-xs text-[var(--muted)]">{FOOTER.role}</p>
+          </div>
+
+          <div className="flex items-center gap-2.5">
             <a
-              href={SOCIALS.github}
+              href={PROFILE.github}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="GitHub profile"
-              className={`rounded-full border border-[var(--glass-border)] p-3 text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
+              aria-label="GitHub"
+              className={`grid h-10 w-10 place-items-center rounded-full border border-[var(--glass-border)] text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
             >
               <Github size={16} aria-hidden="true" />
             </a>
             <a
-              href={SOCIALS.linkedin}
+              href={PROFILE.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="LinkedIn profile"
-              className={`rounded-full border border-[var(--glass-border)] p-3 text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
+              aria-label="LinkedIn"
+              className={`grid h-10 w-10 place-items-center rounded-full border border-[var(--glass-border)] text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
             >
               <Linkedin size={16} aria-hidden="true" />
             </a>
             <a
-              href={`mailto:${SOCIALS.email}`}
-              aria-label={`Email ${SOCIALS.email}`}
-              className={`rounded-full border border-[var(--glass-border)] p-3 text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
+              href={`mailto:${PROFILE.email}`}
+              aria-label="Email"
+              className={`grid h-10 w-10 place-items-center rounded-full border border-[var(--glass-border)] text-[var(--muted)] transition-colors hover:text-[var(--ink)] ${FOCUS_RING}`}
             >
               <Mail size={16} aria-hidden="true" />
             </a>
           </div>
-          <div className="text-left md:text-right">
+
+          <div className="md:text-right">
             <p className="text-xs text-[var(--muted)]">{FOOTER.location}</p>
-            <p className="mt-1 font-mono text-xs tabular-nums text-[var(--muted)]">
-              Local time {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "--:--"}
-            </p>
-            <a
-              href="#home"
-              className={`mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--muted)] hover:text-[var(--ink)] ${FOCUS_RING}`}
-            >
-              Back to top <ArrowDown size={12} aria-hidden="true" className="rotate-180" />
-            </a>
+            <LocalClock />
           </div>
         </div>
-        <div className="mx-auto mt-8 flex max-w-7xl flex-col gap-1 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[13px] text-[var(--muted)]">
-            © {new Date().getFullYear()} {FOOTER.name}. All rights reserved.
-          </p>
-          <p className="text-[13px] text-[var(--muted)]">
-            {PROFILE.university}, {PROFILE.city}
-          </p>
-        </div>
+        <p className="mx-auto mt-6 max-w-7xl font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted-2)]">
+          {FOOTER.tagline}
+        </p>
       </footer>
 
-      {/* Modal */}
+      {/* Case Study Modal */}
       <AnimatePresence>
-        {activeProject && modalIndex !== null && (
+        {activeProject && modalProjectIndex !== null && (
           <ProjectModal
             project={activeProject}
-            index={modalIndex}
-            onClose={() => setModalIndex(null)}
+            index={modalProjectIndex}
+            onClose={() => setModalProjectIndex(null)}
           />
         )}
       </AnimatePresence>
-    </main>
+    </div>
   );
 }

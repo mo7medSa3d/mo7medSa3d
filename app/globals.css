@@ -2,36 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-display: "Space Grotesk", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Space Grotesk", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+:root,
+[data-theme="dark"] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #0f0f0f;
+  --popover: #000000;
+  --primary: #2b65ff;
+  --ring: #2e6aff;
+  --border: #26272e;
+  --input: #162151;
+  --muted-foreground: #7b7e8c;
+  --chart-2: #00cdcc;
+
+  --paper: var(--background);
+  --paper-2: var(--card);
+  --ink: var(--foreground);
+  --muted: var(--muted-foreground);
+  --muted-2: rgba(255, 255, 255, 0.55);
+  --line: var(--border);
+  --glass: rgba(0, 0, 0, 0.82);
+  --glass-border: var(--border);
+  --glass-border-strong: #323e62;
+  --card-border: var(--border);
+  --signal: var(--primary);
+  --signal-2: var(--chart-2);
+  --signal-wash: rgba(43, 101, 255, 0.16);
+  --focus: var(--ring);
+  --aurora-1: rgba(43, 101, 255, 0.14);
+  --aurora-2: rgba(0, 205, 204, 0.08);
+  --shadow: 0 12px 36px -12px rgba(0, 0, 0, 0.55);
+  --shadow-heavy: 0 28px 72px -16px rgba(0, 0, 0, 0.78);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --background: #fcfcfc;
+  --foreground: #0e142b;
+  --card: #fafafa;
+  --popover: #ffffff;
+  --primary: #2e67ff;
+  --ring: #2e6aff;
+  --border: #e7e4e4;
+  --input: #cccccc;
+  --muted-foreground: #0e142b;
+  --chart-2: #00cdcc;
+
+  --paper: var(--background);
+  --paper-2: var(--card);
+  --ink: var(--foreground);
+  --muted: var(--muted-foreground);
+  --muted-2: rgba(14, 20, 43, 0.62);
+  --line: var(--border);
+  --glass: rgba(252, 252, 252, 0.88);
+  --glass-border: var(--border);
+  --glass-border-strong: rgba(14, 20, 43, 0.18);
+  --card-border: var(--border);
+  --signal: var(--primary);
+  --signal-2: var(--chart-2);
+  --signal-wash: rgba(46, 103, 255, 0.12);
+  --focus: var(--ring);
+  --aurora-1: rgba(46, 103, 255, 0.12);
+  --aurora-2: rgba(0, 205, 204, 0.09);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px -10px rgba(15, 23, 42, 0.12);
+  --shadow-heavy: 0 6px 16px rgba(15, 23, 42, 0.07), 0 32px 64px -16px rgba(15, 23, 42, 0.18);
+  color-scheme: light;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   margin: 0;
-  background: #0A0D0C;
-  color: #EDE9DE;
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  overflow-x: clip;
-  font-feature-settings: "tnum" 1, "cv05" 1;
-}
-
-h1, h2, h3, .font-display {
-  font-family: var(--font-display);
-  letter-spacing: -0.025em;
-  font-weight: 600;
-}
-
-code, kbd, pre, .font-mono {
-  font-family: var(--font-mono);
-  font-feature-settings: "tnum" 1;
+  background: var(--paper);
+  color: var(--ink);
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 * {
@@ -39,72 +91,49 @@ code, kbd, pre, .font-mono {
 }
 
 ::selection {
-  background: #C19A4B;
-  color: #0A0D0C;
+  background: var(--signal);
+  color: var(--paper);
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+
 ::-webkit-scrollbar-thumb {
-  background: #26343e;
-  border-radius: 20px;
-  border: 2px solid transparent;
-  background-clip: content-box;
+  background: rgba(148, 163, 184, 0.28);
+  border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(125, 135, 150, 0.35);
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 9999px;
 }
 
-/* Missing keyframes — Background.tsx references `aurora` but it was never
-   defined, so the ambient blobs were static. Keep it slow and subtle. */
-@keyframes aurora {
-  0%, 100% {
-    transform: translate3d(-4%, -2%, 0) scale(1);
-    opacity: 0.9;
+@keyframes orb-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
   }
   50% {
-    transform: translate3d(4%, 3%, 0) scale(1.08);
-    opacity: 1;
+    transform: translate3d(0, -14px, 0) scale(1.04);
   }
+}
+
+.animate-orb {
+  animation: orb-drift 14s ease-in-out infinite;
+}
+
+.animate-orb-slow {
+  animation: orb-drift 18s ease-in-out infinite reverse;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Crisp visible focus for keyboard users without changing mouse hover */
-:focus-visible {
-  outline: 2px solid var(--focus, #5eb1ff);
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-
-/* Balanced headlines, pretty body copy */
-.text-balance {
-  text-wrap: balance;
-}
-.text-pretty {
-  text-wrap: pretty;
-}
-
-@media print {
-  nav, .no-print {
-    display: none !important;
+  .animate-orb,
+  .animate-orb-slow {
+    animation: none;
   }
 }

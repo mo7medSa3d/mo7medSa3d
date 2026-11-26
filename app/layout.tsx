@@ -1,72 +1,79 @@
 import type { Metadata, Viewport } from "next";
+import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: {
-    default: "Mohamed Saad — Data Scientist & ML Engineer",
-    template: "%s | Mohamed Saad",
-  },
+  title: "Mohamed Saad — Data Scientist & Machine Learning Engineer",
   description:
-    "Mohamed Saad is a Computer and Data Science student at Alexandria University building ML systems, predictive analytics, automation pipelines, and BI dashboards that hold up in production.",
+    "Portfolio of Mohamed Saad: production-minded Machine Learning, Predictive Analytics, Data Automation, and Business Intelligence systems.",
   keywords: [
     "Mohamed Saad",
     "Data Scientist",
     "Machine Learning Engineer",
-    "Alexandria University",
-    "Predictive Analytics",
-    "Power BI",
+    "Analytics Engineer",
     "Python",
-    "Portfolio",
+    "Power BI",
+    "Alexandria University",
   ],
-  authors: [{ name: "Mohamed Saad", url: "https://github.com/mo7medSa3d" }],
-  creator: "Mohamed Saad",
-  metadataBase: new URL("https://mo7medsa3d-portfolio.vercel.app"),
+  authors: [{ name: "Mohamed Saad" }],
   openGraph: {
-    type: "website",
-    title: "Mohamed Saad — Data Scientist & ML Engineer",
+    title: "Mohamed Saad — Data Scientist & Machine Learning Engineer",
     description:
-      "ML systems, predictive analytics, automation, and BI dashboards. Based in Alexandria, Egypt.",
-    siteName: "Mohamed Saad Portfolio",
-    images: [{ url: "/images/profile.webp", width: 600, height: 734 }],
+      "Production-minded AI, predictive analytics, automation, and business intelligence systems.",
+    type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "Mohamed Saad — Data Scientist & ML Engineer",
     description:
-      "Building production-minded ML, analytics, and automation systems.",
+      "Production-minded AI, predictive analytics, automation, and business intelligence systems.",
   },
   robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5F3EC" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0D0C" },
+    { media: "(prefers-color-scheme: dark)", color: "#06070A" },
+    { media: "(prefers-color-scheme: light)", color: "#F6F7F9" },
   ],
-  width: "device-width",
-  initialScale: 1,
 };
 
-export default function Layout({
+// Prevents light/dark flash before React hydration.
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("mas-theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}}catch(e){}})();`;
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      data-theme="dark"
+      suppressHydrationWarning
+      className={`${plusJakarta.variable} ${jetbrainsMono.variable}`}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body>{children}</body>
+      <body className="font-sans antialiased">
+        {children}
+      </body>
     </html>
   );
 }

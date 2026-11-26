@@ -1,0 +1,354 @@
+- generic [ref=f1e2]:
+  - link "Skip to content" [ref=f1e3] [cursor=pointer]:
+    - /url: "#home"
+  - banner [ref=f1e4]:
+    - navigation "Primary" [ref=f1e5]:
+      - generic [ref=f1e6]:
+        - link "MS Mohamed Saad" [ref=f1e7] [cursor=pointer]:
+          - /url: "#home"
+          - generic [ref=f1e8]: MS
+          - generic [ref=f1e9]: Mohamed Saad
+        - generic [ref=f1e10]:
+          - link "About" [ref=f1e11] [cursor=pointer]:
+            - /url: "#about"
+          - link "Expertise" [ref=f1e13] [cursor=pointer]:
+            - /url: "#expertise"
+          - link "Projects" [ref=f1e14] [cursor=pointer]:
+            - /url: "#projects"
+          - link "Contact" [ref=f1e15] [cursor=pointer]:
+            - /url: "#contact"
+        - generic [ref=f1e16]:
+          - link "Résumé" [ref=f1e17] [cursor=pointer]:
+            - /url: /resume.pdf
+          - button "Switch to light mode" [ref=f1e22] [cursor=pointer]
+  - main [ref=f1e29]:
+    - generic [ref=f1e31]:
+      - generic [ref=f1e32]:
+        - generic [ref=f1e33]: Available for high-impact opportunities
+        - heading "Mohamed Saad." [level=1] [ref=f1e37]: MohamedSaad.
+        - generic [ref=f1e38]:
+          - paragraph [ref=f1e39]: Currently focused on
+          - generic [ref=f1e40]: Data Scientist
+        - paragraph [ref=f1e43]: Computer and Data Science student at Alexandria University building production-minded AI, predictive analytics, automation, and business intelligence systems.
+        - generic [ref=f1e44]:
+          - link "Explore work" [ref=f1e45] [cursor=pointer]:
+            - /url: "#projects"
+          - link "Get in touch" [ref=f1e49] [cursor=pointer]:
+            - /url: "#contact"
+          - link "Download résumé" [ref=f1e50] [cursor=pointer]:
+            - /url: /resume.pdf
+        - generic [ref=f1e54]:
+          - generic [ref=f1e55]:
+            - generic [ref=f1e56]: 175K+
+            - generic [ref=f1e57]: Records modeled
+          - generic [ref=f1e58]:
+            - generic [ref=f1e59]: "7"
+            - generic [ref=f1e60]: End-to-end systems
+          - generic [ref=f1e61]:
+            - generic [ref=f1e62]: CS & DS
+            - generic [ref=f1e63]: Alexandria University
+      - generic [ref=f1e65]:
+        - img "Mohamed Saad" [ref=f1e72]
+        - generic: Signal Core · Live
+    - region "Engineering intelligence for real business problems." [ref=f1e73]:
+      - paragraph [ref=f1e74]: About
+      - heading "Engineering intelligence for real business problems." [level=2] [ref=f1e75]
+      - generic [ref=f1e76]:
+        - generic [ref=f1e77]:
+          - paragraph [ref=f1e78]: I specialize in machine learning, predictive analytics, data engineering, automation, and business intelligence — turning raw, messy datasets into systems people can actually act on.
+          - generic [ref=f1e83]:
+            - generic [ref=f1e84]: B.Sc. Computer & Information Science (2028)
+            - generic [ref=f1e85]: Alexandria University — Faculty of Computer & Data Science
+        - generic [ref=f1e86]:
+          - generic [ref=f1e87]:
+            - heading "Machine Learning" [level=3] [ref=f1e89]
+            - generic [ref=f1e93]:
+              - generic [ref=f1e94]: Regression
+              - generic [ref=f1e95]: Classification
+              - generic [ref=f1e96]: Feature Engineering
+              - generic [ref=f1e97]: Model Evaluation
+              - generic [ref=f1e98]: Data Mining
+          - generic [ref=f1e99]:
+            - heading "Data Analytics & BI" [level=3] [ref=f1e101]
+            - generic [ref=f1e105]:
+              - generic [ref=f1e106]: Power BI
+              - generic [ref=f1e107]: DAX
+              - generic [ref=f1e108]: SQL
+              - generic [ref=f1e109]: Excel
+              - generic [ref=f1e110]: Dashboard Design
+          - generic [ref=f1e111]:
+            - heading "Automation" [level=3] [ref=f1e113]
+            - generic [ref=f1e117]:
+              - generic [ref=f1e118]: Playwright
+              - generic [ref=f1e119]: Selenium
+              - generic [ref=f1e120]: Web Scraping
+              - generic [ref=f1e121]: ETL Pipelines
+          - generic [ref=f1e122]:
+            - heading "Deployment" [level=3] [ref=f1e124]
+            - generic [ref=f1e128]:
+              - generic [ref=f1e129]: FastAPI
+              - generic [ref=f1e130]: Flask
+              - generic [ref=f1e131]: Docker
+              - generic [ref=f1e132]: Linux CLI
+    - region "A connected intelligence stack." [ref=f1e133]:
+      - generic [ref=f1e134]:
+        - generic [ref=f1e135]:
+          - generic [ref=f1e136]:
+            - paragraph [ref=f1e137]: Technical Stack
+            - heading "A connected intelligence stack." [level=2] [ref=f1e138]
+          - paragraph [ref=f1e139]: From raw data acquisition and feature pipelines to trained models, interactive dashboards, and containerized APIs.
+        - generic [ref=f1e140]:
+          - generic [ref=f1e141]:
+            - heading "Machine Learning & AI" [level=3] [ref=f1e142]
+            - generic [ref=f1e143]:
+              - generic [ref=f1e144]: Python
+              - generic [ref=f1e146]: Machine Learning
+              - generic [ref=f1e148]: Deep Learning
+              - generic [ref=f1e150]: Scikit-Learn
+              - generic [ref=f1e152]: TensorFlow
+              - generic [ref=f1e154]: XGBoost
+          - generic [ref=f1e156]:
+            - heading "Data & Business Intelligence" [level=3] [ref=f1e157]
+            - generic [ref=f1e158]:
+              - generic [ref=f1e159]: Pandas
+              - generic [ref=f1e161]: NumPy
+              - generic [ref=f1e163]: SQL
+              - generic [ref=f1e165]: Power BI
+              - generic [ref=f1e167]: DAX
+              - generic [ref=f1e169]: Tableau
+              - generic [ref=f1e171]: Excel
+          - generic [ref=f1e173]:
+            - heading "Automation & Acquisition" [level=3] [ref=f1e174]
+            - generic [ref=f1e175]:
+              - generic [ref=f1e176]: Playwright
+              - generic [ref=f1e178]: Selenium
+              - generic [ref=f1e180]: Web Scraping
+          - generic [ref=f1e182]:
+            - heading "Backend & Deployment" [level=3] [ref=f1e183]
+            - generic [ref=f1e184]:
+              - generic [ref=f1e185]: FastAPI
+              - generic [ref=f1e187]: Flask
+              - generic [ref=f1e189]: Docker
+    - region "Selected case studies." [ref=f1e191]:
+      - generic [ref=f1e192]:
+        - generic [ref=f1e193]:
+          - generic [ref=f1e194]: Crafted Showcase
+          - heading "Selected case studies." [level=2] [ref=f1e200]
+        - paragraph [ref=f1e201]: Machine learning pipelines, fault-tolerant data scrapers, and executive BI systems built on real-world datasets.
+      - tablist "Filter projects by category" [ref=f1e202]:
+        - tab "All" [selected] [ref=f1e203] [cursor=pointer]
+        - tab "Machine Learning" [ref=f1e204] [cursor=pointer]
+        - tab "BI & Analytics" [ref=f1e205] [cursor=pointer]
+        - tab "Automation" [ref=f1e206] [cursor=pointer]
+      - generic [ref=f1e207]:
+        - article [ref=f1e208]:
+          - generic [ref=f1e209]:
+            - img "Hotel Booking Cancellation Prediction preview" [ref=f1e210]
+            - generic [ref=f1e211]: CASE — 01
+            - generic [ref=f1e214]: Machine Learning
+          - generic [ref=f1e215]:
+            - generic [ref=f1e216]:
+              - heading "Hotel Booking Cancellation Prediction" [level=3] [ref=f1e217]
+              - paragraph [ref=f1e218]: End-to-end machine learning system for predicting hotel booking cancellations, covering EDA, feature engineering, model training, Flask deployment, and Docker containerization.
+              - generic "Technologies used" [ref=f1e219]:
+                - generic [ref=f1e220]: Python
+                - generic [ref=f1e222]: Scikit-Learn
+                - generic [ref=f1e224]: Flask
+                - generic [ref=f1e226]: Docker
+            - generic [ref=f1e228]:
+              - generic [ref=f1e229]:
+                - generic [ref=f1e230]: 120K+
+                - generic [ref=f1e231]: Hotel bookings
+              - generic [ref=f1e232]:
+                - link "View Hotel Booking Cancellation Prediction on GitHub" [ref=f1e233] [cursor=pointer]:
+                  - /url: https://github.com/mo7medSa3d/Hotel-Booking-Cancellation-Prediction
+                - button "Case study" [ref=f1e237] [cursor=pointer]
+        - article [ref=f1e242]:
+          - generic [ref=f1e243]:
+            - img "Dubizzle Real Estate Price Prediction preview" [ref=f1e244]
+            - generic [ref=f1e245]: CASE — 02
+            - generic [ref=f1e248]: Machine Learning
+          - generic [ref=f1e249]:
+            - generic [ref=f1e250]:
+              - heading "Dubizzle Real Estate Price Prediction" [level=3] [ref=f1e251]
+              - paragraph [ref=f1e252]: End-to-end predictive pricing pipeline combining automated web scraping, data cleaning, feature engineering, and gradient-boosted modeling.
+              - generic "Technologies used" [ref=f1e253]:
+                - generic [ref=f1e254]: Python
+                - generic [ref=f1e256]: Pandas
+                - generic [ref=f1e258]: Scikit-Learn
+                - generic [ref=f1e260]: XGBoost
+            - generic [ref=f1e262]:
+              - generic [ref=f1e263]:
+                - generic [ref=f1e264]: 4,500+
+                - generic [ref=f1e265]: Property listings
+              - generic [ref=f1e266]:
+                - link "View Dubizzle Real Estate Price Prediction on GitHub" [ref=f1e267] [cursor=pointer]:
+                  - /url: https://github.com/mo7medSa3d/Real-Estate-Price-Prediction-Project-in-Egypt-Dubizzle-
+                - button "Case study" [ref=f1e271] [cursor=pointer]
+        - article [ref=f1e276]:
+          - generic [ref=f1e277]:
+            - img "FIFA Player Analytics & Market Value Prediction preview" [ref=f1e278]
+            - generic [ref=f1e279]: CASE — 03
+            - generic [ref=f1e282]: Machine Learning
+          - generic [ref=f1e283]:
+            - generic [ref=f1e284]:
+              - heading "FIFA Player Analytics & Market Value Prediction" [level=3] [ref=f1e285]
+              - paragraph [ref=f1e286]: Machine learning system analyzing FIFA player statistics to predict market value and classify player tiers using regression, classification, and ensemble learning.
+              - generic "Technologies used" [ref=f1e287]:
+                - generic [ref=f1e288]: Python
+                - generic [ref=f1e290]: Scikit-Learn
+                - generic [ref=f1e292]: Pandas
+                - generic [ref=f1e294]: Machine Learning
+            - generic [ref=f1e296]:
+              - generic [ref=f1e297]:
+                - generic [ref=f1e298]: 19.6K+
+                - generic [ref=f1e299]: Professional players
+              - generic [ref=f1e300]:
+                - link "View FIFA Player Analytics & Market Value Prediction on GitHub" [ref=f1e301] [cursor=pointer]:
+                  - /url: https://github.com/mo7medSa3d/fifa-player-analytics-ml
+                - button "Case study" [ref=f1e305] [cursor=pointer]
+        - article [ref=f1e310]:
+          - generic [ref=f1e311]:
+            - img "SMS Spam Detector preview" [ref=f1e312]
+            - generic [ref=f1e313]: CASE — 04
+            - generic [ref=f1e316]: Machine Learning
+          - generic [ref=f1e317]:
+            - generic [ref=f1e318]:
+              - heading "SMS Spam Detector" [level=3] [ref=f1e319]
+              - paragraph [ref=f1e320]: AI-powered web application that classifies SMS messages as spam or legitimate using TensorFlow/Keras, provides confidence scores, and suggests automated replies via Flask.
+              - generic "Technologies used" [ref=f1e321]:
+                - generic [ref=f1e322]: TensorFlow
+                - generic [ref=f1e324]: Keras
+                - generic [ref=f1e326]: Flask
+                - generic [ref=f1e328]: Python
+            - generic [ref=f1e330]:
+              - generic [ref=f1e331]:
+                - generic [ref=f1e332]: NLP
+                - generic [ref=f1e333]: Spam classification
+              - generic [ref=f1e334]:
+                - link "View SMS Spam Detector on GitHub" [ref=f1e335] [cursor=pointer]:
+                  - /url: https://github.com/mo7medSa3d/SMS-Spam-Detector
+                - button "Case study" [ref=f1e339] [cursor=pointer]
+        - article [ref=f1e344]:
+          - generic [ref=f1e345]:
+            - img "Hatla2ee Vehicle Scraper preview" [ref=f1e346]
+            - generic [ref=f1e347]: CASE — 05
+            - generic [ref=f1e350]: Automation
+          - generic [ref=f1e351]:
+            - generic [ref=f1e352]:
+              - heading "Hatla2ee Vehicle Scraper" [level=3] [ref=f1e353]
+              - paragraph [ref=f1e354]: Fault-tolerant browser automation pipeline extracting and structuring Egyptian used-car listings into an analysis-ready dataset.
+              - generic "Technologies used" [ref=f1e355]:
+                - generic [ref=f1e356]: Playwright
+                - generic [ref=f1e358]: Selenium
+                - generic [ref=f1e360]: Python
+                - generic [ref=f1e362]: Automation
+            - generic [ref=f1e364]:
+              - generic [ref=f1e365]:
+                - generic [ref=f1e366]: 5,700+
+                - generic [ref=f1e367]: Vehicle listings
+              - generic [ref=f1e368]:
+                - link "View Hatla2ee Vehicle Scraper on GitHub" [ref=f1e369] [cursor=pointer]:
+                  - /url: https://github.com/mo7medSa3d/Hatla2ee-Car-Scraper-Market-Analysis
+                - button "Case study" [ref=f1e373] [cursor=pointer]
+        - article [ref=f1e378]:
+          - generic [ref=f1e379]:
+            - img "Interactive HR Analytics Dashboard preview" [ref=f1e380]
+            - generic [ref=f1e381]: CASE — 06
+            - generic [ref=f1e384]: BI & Analytics
+          - generic [ref=f1e385]:
+            - generic [ref=f1e386]:
+              - heading "Interactive HR Analytics Dashboard" [level=3] [ref=f1e387]
+              - paragraph [ref=f1e388]: Interactive Microsoft Power BI dashboard analyzing employee demographics, workforce distribution, salary insights, and attrition with custom DAX measures and dynamic filtering.
+              - generic "Technologies used" [ref=f1e389]:
+                - generic [ref=f1e390]: Power BI
+                - generic [ref=f1e392]: DAX
+                - generic [ref=f1e394]: Power Query
+                - generic [ref=f1e396]: Data Modeling
+            - generic [ref=f1e398]:
+              - generic [ref=f1e399]:
+                - generic [ref=f1e400]: 1.4K+
+                - generic [ref=f1e401]: HR records
+              - generic [ref=f1e402]:
+                - link "View Interactive HR Analytics Dashboard on GitHub" [ref=f1e403] [cursor=pointer]:
+                  - /url: https://github.com/mo7medSa3d/Interactive-HR-Analytics-Dashboard
+                - button "Case study" [ref=f1e407] [cursor=pointer]
+        - article [ref=f1e412]:
+          - generic [ref=f1e413]:
+            - img "Healthcare Analytics Dashboard preview" [ref=f1e414]
+            - generic [ref=f1e415]: CASE — 07
+            - generic [ref=f1e418]: BI & Analytics
+          - generic [ref=f1e419]:
+            - generic [ref=f1e420]:
+              - heading "Healthcare Analytics Dashboard" [level=3] [ref=f1e421]
+              - paragraph [ref=f1e422]: Interactive Power BI decision system surfacing clinical KPIs, operational trends, and drill-down intelligence across 23.8K+ records.
+              - generic "Technologies used" [ref=f1e423]:
+                - generic [ref=f1e424]: Power BI
+                - generic [ref=f1e426]: DAX
+                - generic [ref=f1e428]: SQL
+                - generic [ref=f1e430]: Data Modeling
+            - generic [ref=f1e432]:
+              - generic [ref=f1e433]:
+                - generic [ref=f1e434]: 23.8K+
+                - generic [ref=f1e435]: Healthcare records
+              - generic [ref=f1e436]:
+                - link "View Healthcare Analytics Dashboard on GitHub" [ref=f1e437] [cursor=pointer]:
+                  - /url: https://github.com/mo7medSa3d/PowerBI-Sales-Dashboard
+                - button "Case study" [ref=f1e441] [cursor=pointer]
+    - region "Let's build the next intelligent system." [ref=f1e446]:
+      - paragraph [ref=f1e447]: Contact
+      - heading "Let's build the next intelligent system." [level=2] [ref=f1e448]
+      - paragraph [ref=f1e449]: Open to data science, machine learning engineering, and analytics roles — reach out directly or explore via the interactive terminal.
+      - generic [ref=f1e450]:
+        - generic [ref=f1e451]:
+          - generic [ref=f1e452]:
+            - text: Direct Email
+            - link "mosaadx229@gmail.com" [ref=f1e453] [cursor=pointer]:
+              - /url: mailto:mosaadx229@gmail.com
+            - generic [ref=f1e454]:
+              - button "Copy email" [ref=f1e455] [cursor=pointer]
+              - link "Open mail app" [ref=f1e460] [cursor=pointer]:
+                - /url: mailto:mosaadx229@gmail.com
+          - generic [ref=f1e465]:
+            - link "LinkedIn" [ref=f1e466] [cursor=pointer]:
+              - /url: https://www.linkedin.com/in/mo7medsa3d
+            - link "GitHub" [ref=f1e476] [cursor=pointer]:
+              - /url: https://github.com/mo7medSa3d
+          - link "Download résumé PDF · 1 page" [ref=f1e485] [cursor=pointer]:
+            - /url: /resume.pdf
+            - generic [ref=f1e491]:
+              - generic [ref=f1e492]: Download résumé
+              - generic [ref=f1e493]: PDF · 1 page
+        - generic [ref=f1e498]:
+          - generic [ref=f1e499]: mohamed@neural-engine:~
+          - generic [ref=f1e508]:
+            - button "whoami" [ref=f1e509] [cursor=pointer]
+            - button "projects" [ref=f1e510] [cursor=pointer]
+            - button "skills" [ref=f1e511] [cursor=pointer]
+            - button "date" [ref=f1e512] [cursor=pointer]
+            - button "theme" [ref=f1e513] [cursor=pointer]
+            - button "clear" [ref=f1e514] [cursor=pointer]
+          - log [ref=f1e515]:
+            - generic [ref=f1e517]:
+              - generic [ref=f1e518]: MOHAMED SAAD // NEURAL-ENGINE v3.0
+              - generic [ref=f1e519]: Type 'help' or click a command below. Use ↑/↓ for history and Tab to autocomplete.
+          - generic [ref=f1e520]:
+            - generic [aria-hidden] [ref=f1e521]: $
+            - textbox "Terminal command input" [ref=f1e522]:
+              - /placeholder: Enter a command (e.g. whoami, projects, date)…
+  - contentinfo [ref=f1e523]:
+    - generic [ref=f1e524]:
+      - generic [ref=f1e525]:
+        - generic [ref=f1e526]: Mohamed Saad
+        - paragraph [ref=f1e527]: Data Scientist · Machine Learning Engineer
+      - generic [ref=f1e528]:
+        - link "GitHub" [ref=f1e529] [cursor=pointer]:
+          - /url: https://github.com/mo7medSa3d
+        - link "LinkedIn" [ref=f1e533] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/mo7medsa3d
+        - link "Email" [ref=f1e538] [cursor=pointer]:
+          - /url: mailto:mosaadx229@gmail.com
+      - generic [ref=f1e542]:
+        - paragraph [ref=f1e543]: Alexandria, Egypt
+        - paragraph [ref=f1e544]: "--:--"
+    - paragraph [ref=f1e545]: DATA. MODELS. AUTOMATION.

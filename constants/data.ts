@@ -1,65 +1,66 @@
-// =====================================================
-//  PROFILE – core personal info
-// =====================================================
+export type ProjectCategory = "Machine Learning" | "BI & Analytics" | "Automation";
+
+export interface ProjectItem {
+  title: string;
+  category: ProjectCategory;
+  metric: string;
+  label: string;
+  summary: string;
+  tech: string[];
+  color: string;
+  github: string;
+  image: string;
+  highlights: string[];
+}
+
 export const PROFILE = {
   firstName: "Mohamed",
   lastName: "Saad",
   fullName: "Mohamed Saad",
   initials: "MS",
-  name: "Mohamed Saad",
   email: "mosaadx229@gmail.com",
-  phone: "",
   city: "Alexandria",
   country: "Egypt",
-  university: "Alexandria University",
-  degree: "B.Sc. Computer and Data Science",
+  university: "Alexandria University — Faculty of Computer & Data Science",
+  degree: "B.Sc. Computer & Information Science (2028)",
   roles: [
     "Data Scientist",
     "Machine Learning Engineer",
     "Data Automation Engineer",
     "Analytics Engineer",
   ],
-  bio: "Final-year Computer and Data Science student at Alexandria University. I build machine learning models, analytics dashboards, and automation pipelines that work on real, messy data.",
+  bio: "Computer and Data Science student at Alexandria University building production-minded AI, predictive analytics, automation, and business intelligence systems.",
   github: "https://github.com/mo7medSa3d",
   linkedin: "https://www.linkedin.com/in/mo7medsa3d",
   resume: "/resume.pdf",
-  availabilityStatus: "Available for internships and junior roles",
-};
+} as const;
 
-// =====================================================
-//  HERO – نصوص وأزرار القسم العلوي
-// =====================================================
 export const HERO = {
-  badgeText: PROFILE.availabilityStatus,
   headingLine1: PROFILE.firstName,
-  headingLine2: PROFILE.lastName + ".",
+  headingLine2: `${PROFILE.lastName}.`,
   subHeading: "Currently focused on",
-  primaryButtonText: "Explore the work",
-  secondaryButtonText: "Start a conversation",
+  primaryButtonText: "Explore work",
+  secondaryButtonText: "Get in touch",
   resumeButtonLabel: "Download résumé",
-  scrollIndicator: "Scroll",
-};
+  metrics: [
+    { value: "175K+", label: "Records modeled" },
+    { value: "7", label: "End-to-end systems" },
+    { value: "CS & DS", label: "Alexandria University" },
+  ],
+} as const;
 
-// =====================================================
-//  NAVIGATION – عناصر القائمة الرئيسية
-// =====================================================
 export const NAVIGATION_ITEMS = [
   { label: "About", href: "#about" },
-  { label: "Background", href: "#background" },
-  { label: "Stack", href: "#expertise" },
+  { label: "Expertise", href: "#expertise" },
   { label: "Projects", href: "#projects" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
-export const NAV_LABELS = NAVIGATION_ITEMS.map((item) => item.label);
-
-// =====================================================
-//  ABOUT
-// =====================================================
 export const ABOUT = {
-  heading: "Messy data in, tools people trust out.",
+  headingStart: "Engineering intelligence for",
+  headingEnd: "real business problems.",
   description:
-    "I work across machine learning, analytics, and automation. Most projects start with raw exports or scraped listings and end as a model, dashboard, or pipeline someone can run.",
+    "I specialize in machine learning, predictive analytics, data engineering, automation, and business intelligence — turning raw, messy datasets into systems people can actually act on.",
   sections: [
     {
       title: "Machine Learning",
@@ -72,291 +73,259 @@ export const ABOUT = {
       ],
     },
     {
-      title: "Data Analytics",
-      items: ["Power BI", "SQL", "Excel", "Dashboard Design", "DAX"],
+      title: "Data Analytics & BI",
+      items: ["Power BI", "DAX", "SQL", "Excel", "Dashboard Design"],
     },
     {
       title: "Automation",
-      items: ["Playwright", "Selenium", "Web Scraping", "Data Cleaning"],
+      items: ["Playwright", "Selenium", "Web Scraping", "ETL Pipelines"],
     },
     {
       title: "Deployment",
-      items: ["Flask", "FastAPI", "Docker", "Git"],
+      items: ["FastAPI", "Flask", "Docker", "Linux CLI"],
     },
   ],
-};
+} as const;
 
-// =====================================================
-//  EXPERTISE
-// =====================================================
 export const EXPERTISE = {
-  heading: "The stack I reach for first.",
-  subheading: "Grouped by where each tool earns its keep.",
-};
+  headingStart: "A connected",
+  headingEnd: "intelligence stack.",
+  subtitle:
+    "From raw data acquisition and feature pipelines to trained models, interactive dashboards, and containerized APIs.",
+} as const;
 
-// =====================================================
-//  EXPERIENCE – education and focus
-// =====================================================
-export const EXPERIENCE = [
-  {
-    period: "2022 to 2026",
-    title: "B.Sc. Computer and Data Science",
-    org: "Alexandria University",
-    detail:
-      "Statistics, databases, machine learning, and software engineering. Graduation project in applied ML.",
-  },
-  {
-    period: "2023 to now",
-    title: "Independent ML and analytics work",
-    org: "Self-directed",
-    detail:
-      "Seven builds end to end: price prediction, cancellation prediction, spam detection, scraping pipelines, and Power BI dashboards. Code on GitHub.",
-  },
-  {
-    period: "Ongoing",
-    title: "What I do best",
-    org: "Modeling, analytics, automation",
-    detail:
-      "Clean difficult datasets, compare models honestly, and ship a simple page or dashboard so results get used.",
-  },
-];
+export const PROJECT_CATEGORIES: readonly ("All" | ProjectCategory)[] = [
+  "All",
+  "Machine Learning",
+  "BI & Analytics",
+  "Automation",
+] as const;
 
-// =====================================================
-//  PROJECTS
-// =====================================================
-export const PROJECTS = [
+export const PROJECTS: ProjectItem[] = [
   {
     title: "Hotel Booking Cancellation Prediction",
+    category: "Machine Learning",
     metric: "120K+",
     label: "Hotel bookings",
     summary:
-      "Predicts which hotel bookings are likely to cancel. Covers exploratory analysis, feature engineering, and model comparison, with a Flask app in Docker so the model can be tried end to end.",
+      "End-to-end machine learning system for predicting hotel booking cancellations, covering EDA, feature engineering, model training, Flask deployment, and Docker containerization.",
     tech: ["Python", "Scikit-Learn", "Flask", "Docker"],
     color: "#14b8a6",
     github:
       "https://github.com/mo7medSa3d/Hotel-Booking-Cancellation-Prediction",
     image: "/images/projects/HBP.webp",
+    highlights: [
+      "Trained and evaluated cancellation classifiers across 120K+ real hotel booking records.",
+      "Built an end-to-end preprocessing and feature engineering pipeline.",
+      "Served real-time predictions via a Flask web interface.",
+      "Containerized the full inference stack with Docker for reproducible deployment.",
+    ],
   },
   {
     title: "Dubizzle Real Estate Price Prediction",
+    category: "Machine Learning",
     metric: "4,500+",
     label: "Property listings",
     summary:
-      "Estimates apartment prices in Egypt from Dubizzle listings. I scraped and cleaned around 4,500 listings, then trained and compared regression models on location and unit features.",
+      "End-to-end predictive pricing pipeline combining automated web scraping, data cleaning, feature engineering, and gradient-boosted modeling.",
     tech: ["Python", "Pandas", "Scikit-Learn", "XGBoost"],
-    color: "#38d9ff",
+    color: "#38bdf8",
     github:
-      "https://github.com/mo7medSa3d/Real-Estate-Price-Prediction-Project-in-Egypt-Dubizzle-.git",
+      "https://github.com/mo7medSa3d/Real-Estate-Price-Prediction-Project-in-Egypt-Dubizzle-",
     image: "/images/projects/Duz.webp",
+    highlights: [
+      "Acquired 4,500+ Egyptian property listings directly from Dubizzle.",
+      "Cleaned inconsistent prices, locations, and property attributes with Pandas.",
+      "Trained XGBoost and Scikit-Learn regressors to estimate fair market pricing.",
+    ],
   },
   {
-    title: "FIFA Player Analytics and Market Value Prediction",
+    title: "FIFA Player Analytics & Market Value Prediction",
+    category: "Machine Learning",
     metric: "19.6K+",
     label: "Professional players",
     summary:
-      "Explores FIFA player data to estimate market value and group players by performance. Uses regression and classification with ensemble models, with attention to which stats drive value.",
+      "Machine learning system analyzing FIFA player statistics to predict market value and classify player tiers using regression, classification, and ensemble learning.",
     tech: ["Python", "Scikit-Learn", "Pandas", "Machine Learning"],
     color: "#22c55e",
     github: "https://github.com/mo7medSa3d/fifa-player-analytics-ml",
     image: "/images/projects/fifa.webp",
+    highlights: [
+      "Engineered hybrid models for market value regression and player tier segmentation.",
+      "Applied Stacking, Random Forest, SVR, and KNN ensembles across ~20K player records.",
+      "Improved R² by ~10% over baseline models through feature and error analysis.",
+    ],
   },
   {
     title: "SMS Spam Detector",
+    category: "Machine Learning",
     metric: "NLP",
     label: "Spam classification",
     summary:
-      "Classifies SMS messages as spam or not, with a confidence score and a simple Flask page to try it. Built with TensorFlow and Keras.",
+      "AI-powered web application that classifies SMS messages as spam or legitimate using TensorFlow/Keras, provides confidence scores, and suggests automated replies via Flask.",
     tech: ["TensorFlow", "Keras", "Flask", "Python"],
     color: "#ec4899",
     github: "https://github.com/mo7medSa3d/SMS-Spam-Detector",
     image: "/images/projects/Spam.webp",
+    highlights: [
+      "Deep-learning NLP classifier built with TensorFlow and Keras.",
+      "Outputs calibrated confidence scores alongside real-time spam predictions.",
+      "Suggests automated replies inside a clean Flask web application.",
+    ],
   },
   {
     title: "Hatla2ee Vehicle Scraper",
+    category: "Automation",
     metric: "5,700+",
     label: "Vehicle listings",
     summary:
-      "Collects used-car listings from Hatla2ee into a clean table for analysis. Handles retries, pagination, and inconsistent fields so the output is ready to model.",
+      "Fault-tolerant browser automation pipeline extracting and structuring Egyptian used-car listings into an analysis-ready dataset.",
     tech: ["Playwright", "Selenium", "Python", "Automation"],
     color: "#a78bfa",
-    github: "https://github.com/mo7medSa3d/Hatla2ee-Car-Scraper-Market-Analysis",
+    github:
+      "https://github.com/mo7medSa3d/Hatla2ee-Car-Scraper-Market-Analysis",
     image: "/images/projects/Hatlaa2e.webp",
+    highlights: [
+      "Automated multi-page extraction across 5,700+ vehicle listings.",
+      "Engineered resilient retry handling and clean schema normalization.",
+      "Produced structured data ready for market pricing and trend analysis.",
+    ],
   },
   {
     title: "Interactive HR Analytics Dashboard",
+    category: "BI & Analytics",
     metric: "1.4K+",
     label: "HR records",
     summary:
-      "Power BI dashboard for HR data covering headcount, hiring, pay, and attrition. Built with Power Query, a star-schema model, DAX measures, and filters for managers.",
-    tech: [
-      "Power BI",
-      "DAX",
-      "Power Query",
-      "Data Modeling",
-      "Business Intelligence"
-    ],
-    color: "#F2C811",
+      "Interactive Microsoft Power BI dashboard analyzing employee demographics, workforce distribution, salary insights, and attrition with custom DAX measures and dynamic filtering.",
+    tech: ["Power BI", "DAX", "Power Query", "Data Modeling"],
+    color: "#eab308",
     github:
       "https://github.com/mo7medSa3d/Interactive-HR-Analytics-Dashboard",
     image: "/images/projects/HR.webp",
+    highlights: [
+      "Tracks workforce demographics, compensation bands, and attrition drivers.",
+      "Built custom DAX measures and Power Query transformation pipelines.",
+      "Designed executive drill-down filters for fast HR decision-making.",
+    ],
   },
   {
     title: "Healthcare Analytics Dashboard",
+    category: "BI & Analytics",
     metric: "23.8K+",
     label: "Healthcare records",
     summary:
-      "Power BI dashboard for healthcare activity with KPIs, trends, and drill-downs by department and time. Built for quick answers, not just charts.",
+      "Interactive Power BI decision system surfacing clinical KPIs, operational trends, and drill-down intelligence across 23.8K+ records.",
     tech: ["Power BI", "DAX", "SQL", "Data Modeling"],
     color: "#fb923c",
     github: "https://github.com/mo7medSa3d/PowerBI-Sales-Dashboard",
     image: "/images/projects/HCA.webp",
+    highlights: [
+      "Modeled 23.8K+ records with SQL preprocessing and star-schema relationships.",
+      "Delivered executive KPI cards, longitudinal trends, and interactive drill-downs.",
+    ],
   },
 ];
 
-// =====================================================
-//  PROJECTS SECTION
-// =====================================================
 export const PROJECTS_SECTION = {
-  heading: "Selected work.",
-  description:
-    "Seven projects end to end in ML, scraping, and BI. Each starts from real data and ends with something you can run or open.",
-  label: "Project notes",
-  codeButton: "Code",
-  discussProject: "Discuss this project",
-};
+  headingStart: "Selected",
+  headingEnd: "case studies.",
+  subtitle:
+    "Machine learning pipelines, fault-tolerant data scrapers, and executive BI systems built on real-world datasets.",
+  caseStudyPrefix: "CASE — ",
+} as const;
 
-// =====================================================
-//  CONTACT
-// =====================================================
 export const CONTACT_SECTION = {
-  heading: "Tell me what decision you need to make.",
-  description:
-    "Email works fastest. Send what you have and what you need to decide.",
-};
+  headingStart: "Let's build the next",
+  headingEnd: "intelligent system.",
+  subtitle:
+    "Open to data science, machine learning engineering, and analytics roles — reach out directly or explore via the interactive terminal.",
+} as const;
 
-// =====================================================
-//  FOOTER
-// =====================================================
 export const FOOTER = {
   name: PROFILE.fullName,
-  role: "Data scientist and machine learning engineer",
-  location: `${PROFILE.city}, ${PROFILE.country}. Open to remote.`,
-  tagline: "Set in Space Grotesk. Built with Next.js.",
-};
+  role: "Data Scientist · Machine Learning Engineer",
+  location: `${PROFILE.city}, ${PROFILE.country}`,
+  tagline: "DATA. MODELS. AUTOMATION.",
+} as const;
 
-// =====================================================
-//  TERMINAL
-// =====================================================
-export const TERMINAL = {
-  welcome: [
-    "mohamed saad, portfolio terminal",
-    "Type 'help' to see what you can ask.",
-  ],
-  secureInterface: "mohamed@portfolio",
-  placeholder: "Type a command, try 'help'…",
-  prompt: "$",
-  helpOutput: [
-    "Available commands:",
-    "  whoami    About me",
-    "  skills    Technical skills",
-    "  projects  List projects",
-    "  email     Email address",
-    "  github    GitHub profile",
-    "  linkedin  LinkedIn profile",
-    "  resume    Download resume",
-    "  theme     Toggle light and dark mode",
-    "  date      Current date and time",
-    "  clear     Clear terminal",
-    "Tip: up and down arrows browse history, Tab completes.",
-  ],
-  whoamiName: PROFILE.name,
-  whoamiBio: PROFILE.bio,
-  whoamiUniversity: `${PROFILE.degree}, ${PROFILE.university}`,
-  skillsLabel: "Skills:",
-  emailLabel: "Email:",
-  githubLabel: "GitHub:",
-  linkedinLabel: "LinkedIn:",
-  resumeLabel: "Resume:",
-  resumeDownload: "Download",
-  themeToggled: "Theme switched.",
-  errorPrefix: 'No such command: "',
-  errorSuffix: '". Type \'help\' to see options.',
-  projectItemPrefix: " — ",
-};
-
-// =====================================================
-//  SKILLS – قائمة المهارات و أنماط التصنيف
-// =====================================================
 export const SKILLS = [
   "Python",
   "Machine Learning",
   "Deep Learning",
-  "SQL",
-  "Power BI",
-  "Excel",
-  "Tableau",
+  "Scikit-Learn",
+  "TensorFlow",
+  "XGBoost",
   "Pandas",
   "NumPy",
-  "Scikit-Learn",
-  "FastAPI",
-  "Flask",
-  "Docker",
+  "SQL",
+  "Power BI",
+  "DAX",
+  "Tableau",
+  "Excel",
   "Playwright",
   "Selenium",
   "Web Scraping",
-];
+  "FastAPI",
+  "Flask",
+  "Docker",
+] as const;
 
-export const SKILL_CATEGORIES = [
+export const SKILL_GROUPS = [
   {
-    name: "Data and analytics",
-    pattern: /(pandas|numpy|sql|power bi|tableau|excel|etl|data)/i,
+    name: "Machine Learning & AI",
+    items: ["Python", "Machine Learning", "Deep Learning", "Scikit-Learn", "TensorFlow", "XGBoost"],
   },
   {
-    name: "Modeling",
-    pattern: /(scikit|sklearn|tensorflow|keras|pytorch|xgboost|machine|deep|learning)/i,
+    name: "Data & Business Intelligence",
+    items: ["Pandas", "NumPy", "SQL", "Power BI", "DAX", "Tableau", "Excel"],
   },
   {
-    name: "Engineering and deploy",
-    pattern: /(flask|fastapi|docker|api|git)/i,
+    name: "Automation & Acquisition",
+    items: ["Playwright", "Selenium", "Web Scraping"],
   },
   {
-    name: "Automation",
-    pattern: /(playwright|selenium|scrap)/i,
+    name: "Backend & Deployment",
+    items: ["FastAPI", "Flask", "Docker"],
   },
-  { name: "Core", pattern: /.*/ },
-];
+] as const;
 
-// =====================================================
-//  LOADER
-// =====================================================
-export const LOADER = {
-  tagline: "Loading portfolio",
-  headingLine1: "MOHAMED",
-  headingLine2: "Saad",
-};
+export const TERMINAL_COMMANDS = [
+  "help",
+  "whoami",
+  "skills",
+  "projects",
+  "email",
+  "github",
+  "linkedin",
+  "resume",
+  "theme",
+  "date",
+  "clear",
+] as const;
 
-// =====================================================
-//  UI CONSTANTS
-// =====================================================
+export const TERMINAL = {
+  welcome: [
+    "MOHAMED SAAD // PORTFOLIO",
+    "Type 'help' or click a command below. Use ↑/↓ for history and Tab to autocomplete.",
+  ],
+  promptLabel: "mohamed@portfolio:~",
+  placeholder: "Enter a command (e.g. whoami, projects, date)…",
+  helpLines: [
+    "whoami    — Profile & education",
+    "skills    — Core technical stack",
+    "projects  — List all 7 case studies",
+    "email     — Direct email address",
+    "github    — GitHub repositories",
+    "linkedin  — LinkedIn profile",
+    "resume    — Download PDF résumé",
+    "theme     — Toggle light / dark mode",
+    "date      — Current local date & time",
+    "clear     — Clear terminal output",
+  ],
+} as const;
+
 export const UI = {
-  loaderTickMs: 70,
-  loaderStep: 12,
-  loaderExitDelayMs: 350,
-  roleRotateMs: 3000,
+  roleRotateMs: 2800,
   scrollCompactThreshold: 40,
-  cursorViewLabel: "VIEW",
-  cursorExploreLabel: "OPEN",
-  cursorContactLabel: "SAY HI",
-  cursorCodeLabel: "CODE",
-  cursorOpenLabel: "OPEN",
-  signalCoreLive: "Open to work",
-};
-
-// =====================================================
-//  SOCIALS – وسائل التواصل الاجتماعي
-// =====================================================
-export const SOCIALS = {
-  github: PROFILE.github,
-  linkedin: PROFILE.linkedin,
-  email: PROFILE.email,
-};
+} as const;

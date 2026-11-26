@@ -1,0 +1,5 @@
+[     651ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3001/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14538
+[    2088ms] [WARNING] [.WebGL-0x1f6402db7000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:3001/:1
+[    2125ms] [WARNING] [.WebGL-0x1f6402db7000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:3001/:1
+[    2203ms] [WARNING] [.WebGL-0x1f6402db7000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:3001/:1
+[    2278ms] [WARNING] [.WebGL-0x1f6402db7000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) @ http://localhost:3001/:1

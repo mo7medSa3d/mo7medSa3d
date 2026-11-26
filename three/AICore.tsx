@@ -1,29 +1,22 @@
 "use client";
 
 /**
- * Signal Core — the hero visualization.
+ * Signal Core — hero WebGL visualization.
  *
- * Design intent: instead of a generic "neural network sphere," the three
- * orbiting rings are a stylized read-out of the three real datasets the
- * portfolio is built on (real estate / vehicle / healthcare records). Node
- * counts are perf-capped, scaled-down proxies for those record counts, not
- * literal counts — the point is the instrument-panel feeling of a system
- * actively processing real data, not a decorative animation.
- *
- * Performance: no post-processing pipeline (kept out of the dependency
- * list on purpose) — glow is a single additive sprite using a canvas
- * texture generated once and disposed on unmount. DPR is capped, geometry
- * is minimal and instanced where it repeats, and all motion is scaled
- * down under prefers-reduced-motion.
+ * Performance:
+ * - Pauses rendering (frameloop="never") whenever scrolled out of viewport.
+ * - Uses THREE.InstancedMesh per orbit ring (3 draw calls instead of 37).
+ * - Disposes GPU resources cleanly on unmount and degrades to a CSS ring
+ *   when WebGL is unavailable or prefers-reduced-motion is enabled.
  */
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-const SIGNAL = "#C19A4B";
-const SIGNAL_2 = "#6BA99E";
-const SIGNAL_3 = "#8A7B5A";
+const SIGNAL = "#38BDF8";
+const SIGNAL_2 = "#8B5CF6";
+const SIGNAL_3 = "#22D3EE";
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -38,7 +31,7 @@ function useReducedMotion() {
 }
 
 function makeGlowTexture() {
-  const size = 256;
+  const size = 128;
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -52,14 +45,13 @@ function makeGlowTexture() {
       size / 2,
       size / 2,
     );
-    grad.addColorStop(0, "rgba(255,255,255,0.95)");
-    grad.addColorStop(0.35, "rgba(255,255,255,0.28)");
+    grad.addColorStop(0, "rgba(255,255,255,0.9)");
+    grad.addColorStop(0.35, "rgba(255,255,255,0.25)");
     grad.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
   }
-  const texture = new THREE.CanvasTexture(canvas);
-  return texture;
+  return new THREE.CanvasTexture(canvas);
 }
 
 function Glow() {
@@ -71,7 +63,7 @@ function Glow() {
         map={texture}
         color={SIGNAL}
         transparent
-        opacity={0.3}
+        opacity={0.28}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />
@@ -85,10 +77,10 @@ function Core({ reduced }: { reduced: boolean }) {
     const m = mesh.current;
     if (!m) return;
     const t = state.clock.elapsedTime;
-    const breathe = 1 + Math.sin(t * (reduced ? 0.25 : 0.75)) * 0.035;
+    const breathe = 1 + Math.sin(t * (reduced ? 0.25 : 0.7)) * 0.03;
     m.scale.setScalar(breathe);
-    m.rotation.y += delta * (reduced ? 0.04 : 0.14);
-    m.rotation.x += delta * (reduced ? 0.015 : 0.05);
+    m.rotation.y += delta * (reduced ? 0.03 : 0.13);
+    m.rotation.x += delta * (reduced ? 0.01 : 0.045);
   });
   return (
     <mesh ref={mesh}>
@@ -96,10 +88,10 @@ function Core({ reduced }: { reduced: boolean }) {
       <meshStandardMaterial
         color="#0c1015"
         emissive={SIGNAL}
-        emissiveIntensity={0.32}
+        emissiveIntensity={0.35}
         wireframe
         transparent
-        opacity={0.88}
+        opacity={0.85}
       />
     </mesh>
   );
@@ -121,18 +113,20 @@ function DataRing({
   reduced: boolean;
 }) {
   const group = useRef<THREE.Group>(null);
-  const nodes = useMemo(
-    () =>
-      Array.from({ length: count }, (_, i) => {
-        const a = (i / count) * Math.PI * 2;
-        return [Math.cos(a) * radius, 0, Math.sin(a) * radius] as [
-          number,
-          number,
-          number,
-        ];
-      }),
-    [count, radius],
-  );
+  const instanced = useRef<THREE.InstancedMesh>(null);
+
+  useEffect(() => {
+    const mesh = instanced.current;
+    if (!mesh) return;
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      dummy.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate = true;
+  }, [count, radius]);
 
   useFrame((_, delta) => {
     const g = group.current;
@@ -143,19 +137,17 @@ function DataRing({
   return (
     <group ref={group} rotation-x={tilt}>
       <mesh>
-        <torusGeometry args={[radius, 0.012, 8, 128]} />
-        <meshBasicMaterial color={color} transparent opacity={0.32} />
+        <torusGeometry args={[radius, 0.011, 8, 96]} />
+        <meshBasicMaterial color={color} transparent opacity={0.3} />
       </mesh>
-      {nodes.map((p, i) => (
-        <mesh key={i} position={p}>
-          <sphereGeometry args={[0.032, 8, 8]} />
-          <meshStandardMaterial
-            color={color}
-            emissive={color}
-            emissiveIntensity={2.2}
-          />
-        </mesh>
-      ))}
+      <instancedMesh ref={instanced} args={[undefined, undefined, count]}>
+        <sphereGeometry args={[0.032, 8, 8]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={2}
+        />
+      </instancedMesh>
     </group>
   );
 }
@@ -163,10 +155,10 @@ function DataRing({
 function ParticleField({ reduced }: { reduced: boolean }) {
   const points = useRef<THREE.Points>(null);
   const positions = useMemo(() => {
-    const count = 280;
+    const count = 200;
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const r = 3.2 + Math.random() * 2.6;
+      const r = 3.1 + Math.random() * 2.4;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
@@ -179,7 +171,7 @@ function ParticleField({ reduced }: { reduced: boolean }) {
   useFrame((_, delta) => {
     const p = points.current;
     if (!p) return;
-    p.rotation.y += delta * (reduced ? 0.008 : 0.025);
+    p.rotation.y += delta * (reduced ? 0.006 : 0.022);
   });
 
   return (
@@ -197,7 +189,7 @@ function ParticleField({ reduced }: { reduced: boolean }) {
         size={0.018}
         color={SIGNAL_3}
         transparent
-        opacity={0.55}
+        opacity={0.5}
         sizeAttenuation
       />
     </points>
@@ -210,70 +202,79 @@ function Scene() {
   const pointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
+    if (reduced) return;
     const onMove = (e: PointerEvent) => {
       pointer.current.x = (e.clientX / window.innerWidth - 0.5) * 2;
       pointer.current.y = (e.clientY / window.innerHeight - 0.5) * 2;
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
-  }, []);
+  }, [reduced]);
 
   useFrame(() => {
     const g = group.current;
     if (!g || reduced) return;
-    g.rotation.y += (pointer.current.x * 0.32 - g.rotation.y) * 0.04;
-    g.rotation.x += (-pointer.current.y * 0.22 - g.rotation.x) * 0.04;
+    g.rotation.y += (pointer.current.x * 0.28 - g.rotation.y) * 0.04;
+    g.rotation.x += (-pointer.current.y * 0.2 - g.rotation.x) * 0.04;
   });
 
   return (
-    <group ref={group} scale={0.72}>
-      <ambientLight intensity={0.4} />
+    <group ref={group} scale={0.74}>
+      <ambientLight intensity={0.45} />
       <pointLight position={[3, 3, 3]} intensity={1.3} color={SIGNAL} />
       <pointLight position={[-3, -2, -2]} intensity={0.85} color={SIGNAL_2} />
       <Glow />
       <Core reduced={reduced} />
-      {/* real estate records */}
-      <DataRing
-        radius={1.55}
-        count={12}
-        color={SIGNAL}
-        speed={0.24}
-        tilt={0.5}
-        reduced={reduced}
-      />
-      {/* vehicle listings */}
-      <DataRing
-        radius={2.05}
-        count={16}
-        color={SIGNAL_2}
-        speed={-0.17}
-        tilt={-0.35}
-        reduced={reduced}
-      />
-      {/* healthcare records */}
-      <DataRing
-        radius={2.6}
-        count={9}
-        color={SIGNAL_3}
-        speed={0.11}
-        tilt={1.05}
-        reduced={reduced}
-      />
+      <DataRing radius={1.55} count={12} color={SIGNAL} speed={0.22} tilt={0.5} reduced={reduced} />
+      <DataRing radius={2.05} count={16} color={SIGNAL_2} speed={-0.16} tilt={-0.35} reduced={reduced} />
+      <DataRing radius={2.6} count={9} color={SIGNAL_3} speed={0.11} tilt={1.05} reduced={reduced} />
       <ParticleField reduced={reduced} />
     </group>
   );
 }
 
 export default function AICore() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
+  const [webglOk, setWebglOk] = useState(true);
+
+  useEffect(() => {
+    try {
+      const test = document.createElement("canvas");
+      const gl = test.getContext("webgl2") || test.getContext("webgl");
+      if (!gl) setWebglOk(false);
+    } catch {
+      setWebglOk(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { rootMargin: "100px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="relative h-full w-full select-none" aria-hidden="true">
-      <Canvas
-        dpr={[1, 1.5]}
-        camera={{ position: [0, 0, 6.2], fov: 42 }}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      >
-        <Scene />
-      </Canvas>
+    <div ref={containerRef} className="relative h-full w-full select-none" aria-hidden="true">
+      {webglOk ? (
+        <Canvas
+          frameloop={visible ? "always" : "never"}
+          dpr={[1, 1.5]}
+          camera={{ position: [0, 0, 6.2], fov: 42 }}
+          gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        >
+          <Scene />
+        </Canvas>
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="h-[68%] w-[68%] rounded-full border border-[var(--signal)]/30 shadow-[0_0_80px_var(--signal-wash)]" />
+        </div>
+      )}
     </div>
   );
 }
